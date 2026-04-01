@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy &mdash; UnfollowerSpy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a40e0;
+            --primary-container: #9795ff;
+            --primary-dim: #3d30d4;
+            --secondary: #6249b2;
+            --surface: #f5f6f7;
+            --surface-low: #eff1f2;
+            --surface-lowest: #ffffff;
+            --surface-variant: #dadddf;
+            --on-surface: #2c2f30;
+            --shadow-soft: 0 12px 40px rgba(44, 47, 48, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(245, 246, 247, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            font-family: 'Manrope', sans-serif;
+            text-decoration: none;
+        }
+
+        .pill-badge {
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            color: var(--on-surface);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .hero {
+            padding: 4rem 0 2rem;
+        }
+
+        .hero-inner {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .eyebrow {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--primary);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            line-height: 1.05;
+            margin-bottom: 1rem;
+            max-width: 650px;
+        }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: #6b7172;
+            max-width: 620px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, rgba(74, 64, 224, 0.08), rgba(98, 73, 178, 0.12));
+            border: 1px solid rgba(74, 64, 224, 0.12);
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .summary-card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .summary-card p {
+            color: #555d5f;
+        }
+
+        .policy-shell {
+            padding-bottom: 4rem;
+        }
+
+        .policy-card {
+            background: var(--surface-lowest);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+        }
+
+        .policy-grid {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+        }
+
+        .policy-nav {
+            background: var(--surface-low);
+            border-right: 1px solid var(--surface-variant);
+            padding: 2rem 1.5rem;
+            position: sticky;
+            top: 88px;
+            align-self: start;
+        }
+
+        .policy-nav h2 {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .policy-nav a {
+            display: block;
+            color: #555d5f;
+            text-decoration: none;
+            padding: 0.45rem 0;
+            font-size: 0.9rem;
+        }
+
+        .policy-nav a:hover {
+            color: var(--primary);
+        }
+
+        .policy-content {
+            padding: 2.5rem;
+        }
+
+        .policy-section + .policy-section {
+            margin-top: 2.5rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid var(--surface-variant);
+        }
+
+        .policy-section h2 {
+            font-size: 1.35rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .policy-section p + p {
+            margin-top: 0.9rem;
+        }
+
+        .policy-section ul {
+            margin-top: 0.9rem;
+            padding-left: 1.25rem;
+            color: #4f5658;
+        }
+
+        .policy-section li + li {
+            margin-top: 0.5rem;
+        }
+
+        .contact-box {
+            margin-top: 1rem;
+            background: var(--surface-low);
+            border-radius: 1rem;
+            padding: 1.25rem;
+        }
+
+        section.footer {
+            padding: 4rem 0;
+            border-top: 1px solid var(--surface-variant);
+            margin-top: 0;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .pill-badge {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 3rem;
+            }
+
+            .hero-inner,
+            .policy-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .policy-nav {
+                position: static;
+                border-right: none;
+                border-bottom: 1px solid var(--surface-variant);
+            }
+
+            .policy-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1972049048294019" crossorigin="anonymous"></script>
+</head>
+<body>
+    <nav>
+        <div class="container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+            <a href="index.html" class="logo">UnfollowerSpy</a>
+            <div style="display: flex; align-items: center;">
+                <div class="pill-badge">100% Private &middot; No Login</div>
+                <a href="index.html" class="nav-link">Back to Audit</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container hero-inner">
+            <div>
+                <span class="eyebrow">Privacy Policy</span>
+                <h1 class="hero-title">Your Instagram export stays on your device.</h1>
+                <p class="hero-sub">This page explains what UnfollowerSpy collects, what it does not collect, and how analytics and advertising tools may operate alongside the browser-based audit experience.</p>
+            </div>
+            <div class="summary-card">
+                <h2>At a glance</h2>
+                <p>UnfollowerSpy processes Instagram export files locally in your browser. We do not upload, store, or retain the contents of your Instagram export on our servers.</p>
+            </div>
+        </div>
+    </section>
+
+    <main class="policy-shell">
+        <div class="container">
+            <div class="policy-card">
+                <div class="policy-grid">
+                    <aside class="policy-nav">
+                        <h2>On this page</h2>
+                        <a href="#overview">Overview</a>
+                        <a href="#information-we-collect">Information We Collect</a>
+                        <a href="#cookies-tracking">Cookies &amp; Tracking</a>
+                        <a href="#adsense">Google AdSense &amp; Advertising</a>
+                        <a href="#analytics">Google Analytics</a>
+                        <a href="#how-we-use-information">How We Use Information</a>
+                        <a href="#third-party-links">Third-Party Links</a>
+                        <a href="#children">Children's Privacy</a>
+                        <a href="#your-rights">Your Rights</a>
+                        <a href="#changes">Changes to This Policy</a>
+                        <a href="#contact">Contact</a>
+                    </aside>
+
+                    <div class="policy-content">
+                        <section class="policy-section" id="overview">
+                            <h2>1. Overview</h2>
+                            <p>UnfollowerSpy is designed to analyze Instagram export files entirely in the browser. When you upload your Instagram zip file, the parsing and comparison work happens on your device. We do not store your Instagram export, follower data, usernames, messages, media, or any other Instagram content on our servers.</p>
+                            <p>This local-processing approach is the foundation of the product. It reduces data exposure and keeps the analysis tied to your browser session rather than a remote database.</p>
+                        </section>
+
+                        <section class="policy-section" id="information-we-collect">
+                            <h2>2. Information We Collect</h2>
+                            <p>We do not collect the contents of your Instagram export. That means we do not intentionally receive or retain your followers list, following list, messages, photos, videos, stories, or profile data.</p>
+                            <p>We may collect limited anonymous analytics information about how the website is used, such as page views, device type, browser type, general region, and interaction events. This information does not include the contents of your Instagram file.</p>
+                        </section>
+
+                        <section class="policy-section" id="cookies-tracking">
+                            <h2>3. Cookies &amp; Tracking</h2>
+                            <p>We may use cookies and similar technologies to understand site performance, measure traffic, prevent abuse, and support advertising. These tools help us understand whether the site is functioning correctly and which pages are most useful.</p>
+                            <p>Cookies used for analytics and advertising may be set by us or by third-party services integrated into the site.</p>
+                        </section>
+
+                        <section class="policy-section" id="adsense">
+                            <h2>4. Google AdSense &amp; Advertising</h2>
+                            <p>We may use Google AdSense or related Google advertising products to display ads on the site. Google may use cookies or similar technologies to show personalised or contextual ads based on your browsing activity and other signals.</p>
+                            <p>You can learn more about how Google uses information in advertising and control ad personalisation through Google's settings: <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">https://adssettings.google.com/</a>.</p>
+                        </section>
+
+                        <section class="policy-section" id="analytics">
+                            <h2>5. Google Analytics</h2>
+                            <p>We may use Google Analytics to understand how visitors use the site, such as which pages are viewed, how long sessions last, and what types of devices access the site. This information is used in aggregated form to improve usability and site reliability.</p>
+                            <p>You can learn more about Google's practices and opt out using the official tools here: <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">https://tools.google.com/dlpage/gaoptout</a>.</p>
+                        </section>
+
+                        <section class="policy-section" id="how-we-use-information">
+                            <h2>6. How We Use Information</h2>
+                            <p>Any limited analytics or advertising-related information may be used to operate the website, monitor performance, understand usage trends, improve the product, detect misuse, and support monetisation through advertising.</p>
+                            <p>We do not use Instagram export contents for profiling, sale, sharing, or storage because those contents are not collected by the service.</p>
+                        </section>
+
+                        <section class="policy-section" id="third-party-links">
+                            <h2>7. Third-Party Links</h2>
+                            <p>This website may link to third-party services, including Instagram, Google, advertising settings pages, and analytics opt-out pages. Once you leave this site, those third parties control their own content and privacy practices.</p>
+                            <p>You should review the privacy policies of any third-party services you visit through links on this site.</p>
+                        </section>
+
+                        <section class="policy-section" id="children">
+                            <h2>8. Children's Privacy</h2>
+                            <p>UnfollowerSpy is not directed to children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child has provided personal information through the site, contact us so we can review the issue and take appropriate action.</p>
+                        </section>
+
+                        <section class="policy-section" id="your-rights">
+                            <h2>9. Your Rights</h2>
+                            <p>Depending on your location, you may have rights relating to personal information processed about you. These may include rights to access, correct, delete, or restrict certain data, and to withdraw consent where processing relies on consent.</p>
+                            <ul>
+                                <li>Request access to information associated with you.</li>
+                                <li>Request correction of inaccurate information.</li>
+                                <li>Request deletion where applicable.</li>
+                                <li>Withdraw consent for optional data processing where consent is the basis used.</li>
+                            </ul>
+                            <p>Because Instagram export contents are processed locally and not stored by us, many requests relating to uploaded Instagram data can be handled directly by closing the page or clearing browser data on your device.</p>
+                        </section>
+
+                        <section class="policy-section" id="changes">
+                            <h2>10. Changes to This Policy</h2>
+                            <p>We may update this Privacy Policy from time to time to reflect changes in the product, legal requirements, analytics tooling, or advertising practices. When we do, we will post the updated version on this page with the revised effective date.</p>
+                            <p>Effective date: March 31, 2026.</p>
+                        </section>
+
+                        <section class="policy-section" id="contact">
+                            <h2>11. Contact</h2>
+                            <p>If you have a privacy question, a rights request, or a concern about how this site operates, contact us using the details below.</p>
+                            <div class="contact-box">
+                                <p><strong>Contact:</strong> unfollowerspy@gmail.com</p>
+                                <p><strong>Subject line:</strong> Privacy Policy Request</p>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="footer">
+        <div class="container" style="text-align: center; color: #6b7172;">
+            <p>&copy; 2026 UnfollowerSpy. Privacy First. Local Processing only.</p>
+            <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 2rem;">
+                <a href="index.html" class="nav-link" style="margin: 0;">Home</a>
+                <a href="privacy-policy.html" class="nav-link" style="margin: 0;">Privacy Policy</a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

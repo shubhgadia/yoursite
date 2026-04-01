@@ -1,0 +1,1674 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnfollowerSpy &mdash; Private Instagram Audit</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <!-- JSZip for local ZIP processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --primary: #4a40e0;
+            --primary-container: #9795ff;
+            --primary-dim: #3d30d4;
+            --secondary: #6249b2;
+            --tertiary: #983772;
+            --surface: #f5f6f7;
+            --surface-low: #eff1f2;
+            --surface-lowest: #ffffff;
+            --surface-high: #e3e5e7;
+            --surface-highest: #dadddf;
+            --on-surface: #2c2f30;
+            --outline-variant: #abadae;
+            --surface-variant: #dadddf;
+            
+            --shadow-soft: 0 12px 40px rgba(44, 47, 48, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .hero-num {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800;
+        }
+
+        /* --- STICKY NAV --- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(245, 246, 247, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            font-family: 'Manrope', sans-serif;
+            text-decoration: none;
+        }
+
+        .pill-badge {
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .scroll-progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(171, 173, 174, 0.1);
+        }
+
+        .scroll-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            transition: width 0.1s ease-out;
+        }
+
+        /* --- LAYOUT UTILS --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        section {
+            padding: 8rem 0;
+        }
+
+        .hero {
+            padding-top: 4rem;
+            padding-bottom: 4rem;
+        }
+
+        .asymmetric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.36fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        /* --- HERO --- */
+        .hero-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--primary);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            font-weight: 300;
+            color: #6b7172;
+            margin-bottom: 2.5rem;
+            max-width: 500px;
+        }
+
+        .trust-badges {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: nowrap;
+        }
+
+        .trust-badge {
+            font-size: 0.75rem;
+            color: var(--on-surface);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.8;
+            white-space: nowrap;
+        }
+
+        .hero-preview-card {
+            background: var(--surface-lowest);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-soft);
+            transform: rotate(2deg);
+            position: relative;
+        }
+
+        .hero-right { position: relative; display: flex; align-items: center; justify-content: center; overflow: visible; padding: 0; border-radius: 0; background: transparent; box-shadow: none; transform: none; min-height: auto; width: 100%; }
+
+        .hero-right svg {
+            width: 100%;
+            height: auto;
+            max-width: none;
+            margin: 0 0 0 4rem;
+            display: block;
+        }
+
+        .mock-list {
+            list-style: none;
+        }
+
+        .mock-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            opacity: 0.6;
+        }
+
+        .mock-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--surface-high);
+        }
+
+        .mock-name {
+            height: 10px;
+            background: var(--surface-high);
+            border-radius: 5px;
+            width: 80px;
+            filter: blur(4px);
+        }
+
+        /* --- HOW IT WORKS --- */
+        .how-bg {
+            background-color: var(--surface-low);
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--primary);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            gap: 1rem;
+        }
+
+        .results-header .section-title {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 768px) {
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .results-header .btn-ghost {
+                width: auto;
+                margin-top: 1rem;
+            }
+        }
+
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 2rem;
+            position: relative;
+        }
+
+        .step-connector {
+            position: absolute;
+            left: 0.6rem;
+            top: 2rem;
+            bottom: -3.5rem;
+            width: 2px;
+            background: rgba(171, 173, 174, 0.2);
+            border-radius: 2px;
+        }
+
+        .step-item:last-child .step-connector {
+            display: none;
+        }
+
+        .step-num {
+            min-width: 1.25rem;
+            height: 1.25rem;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 800;
+            z-index: 1;
+            margin-top: 0.25rem;
+        }
+
+        .step-content h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .step-content p {
+            color: #6b7172;
+            max-width: 450px;
+        }
+
+        /* --- UPLOAD & RESULTS --- */
+        .upload-card {
+            background: var(--surface-lowest);
+            border-radius: 1.5rem;
+            padding: 4rem 2rem;
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a40e0, #3d30d4);
+            color: white;
+            padding: 1.25rem 2.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--primary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(74, 64, 224, 0.3);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-ghost:hover {
+            background-color: rgba(74, 64, 224, 0.05);
+            border-color: rgba(74, 64, 224, 0.5);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .results-container {
+            display: none;
+            margin-top: 4rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: var(--surface-lowest);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6b7172;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-num {
+            font-size: 3.5rem;
+            line-height: 1;
+            margin: 0;
+        }
+
+        .stat-num.traitor {
+            color: var(--tertiary);
+        }
+
+        .user-list {
+            background: var(--surface-lowest);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2.5rem;
+            position: relative;
+        }
+
+        .user-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            right: 5%;
+            height: 1px;
+            background-color: var(--surface-variant);
+        }
+
+        .user-item:last-child::after {
+            display: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-handle {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .status-pill {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .mobile-only { display: none; }
+        .desktop-only { display: block; }
+
+        .handle-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .btn-view {
+            background-color: var(--surface-high);
+            color: var(--on-surface);
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-view:hover {
+            background-color: var(--surface-highest);
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        /* --- SEARCH BAR --- */
+        .search-container {
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.1rem 1rem 1.1rem 3.5rem;
+            background-color: var(--surface-low);
+            border: none;
+            border-radius: 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: var(--on-surface);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            background-color: var(--surface-high);
+            box-shadow: 0 0 0 2px rgba(74, 64, 224, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7172;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--surface-high);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--primary);
+        }
+
+        /* --- TIME FILTER --- */
+        .filter-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            border: none;
+            background-color: var(--surface-low);
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .results-note {
+            font-size: 0.75rem;
+            color: #6b7172;
+            margin-top: -2.5rem;
+            margin-bottom: 3rem;
+            opacity: 0.8;
+        }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+            .logo {
+                font-size: 1rem; /* 16px */
+            }
+            section {
+                padding: 4rem 0;
+            }
+            .container {
+                padding: 0 1.5rem;
+            }
+            .asymmetric-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+            .hero-left {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .hero-title {
+                font-size: 2.5rem;
+                max-width: 100%;
+            }
+            .hero-sub {
+                max-width: 100%;
+            }
+            .trust-badges {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .pill-badge {
+                display: none;
+            }
+            .hero-right {
+                display: none;
+                width: 100%;
+                margin-top: 2rem;
+                min-height: 400px;
+            }
+            .btn-primary {
+                width: 100%;
+                justify-content: center;
+                min-height: 48px; /* Touch friendly */
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            .stat-card:last-child {
+                grid-column: span 2; /* Make the 3rd stat card (Non-Followers) span 2 columns in the 2x2 grid */
+            }
+            .stat-card {
+                padding: 1.5rem;
+            }
+            .stat-num {
+                font-size: 2.5rem;
+            }
+            .filter-group {
+                gap: 0.5rem;
+            }
+            .filter-btn {
+                flex: 1 1 calc(50% - 0.5rem);
+                min-height: 44px; /* Touch friendly */
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+            .search-input {
+                min-height: 48px; /* Touch friendly */
+            }
+            .user-item {
+                padding: 1rem 1.25rem;
+            }
+            .btn-ghost {
+                width: 100%;
+                min-height: 44px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .pill-badge {
+                display: none; /* Hide badge on very small screens */
+            }
+            .hero-title {
+                font-size: 2rem;
+            }
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 246, 247, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--surface-high);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .hide-mobile {
+                display: none !important;
+                visibility: hidden !important;
+            }
+        }
+
+        /* --- SORT DROPDOWN --- */
+        .controls-row {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            align-items: stretch;
+        }
+
+        .search-container {
+            margin: 0;
+            flex: 1;
+            position: relative;
+        }
+
+        .sort-container {
+            position: relative;
+        }
+
+        .sort-btn {
+            height: 100%;
+            padding: 0 1.5rem;
+            background-color: var(--surface-low);
+            border: none;
+            border-radius: 1rem;
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sort-btn:hover {
+            background-color: var(--surface-high);
+        }
+
+        .sort-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--surface-lowest);
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 100;
+            min-width: 150px;
+            overflow: hidden;
+            border: 1px solid var(--surface-high);
+        }
+
+        .sort-option {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .sort-option:hover {
+            background: var(--surface-low);
+        }
+
+        .sort-dropdown.show {
+            display: block;
+        }
+
+        /* --- ADSENSE PLACEHOLDERS --- */
+        .adsense-placeholder {
+            height: 120px;
+            background-color: #f5f6f7;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #6b7172;
+            margin: 24px 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .adsense-placeholder {
+                margin: 24px 1.25rem;
+            }
+        }
+
+        /* --- FAQ SECTION --- */
+        #faq-page {
+            display: none;
+            background-color: var(--surface);
+            min-height: 100vh;
+            padding-bottom: 8rem;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 4rem auto 0;
+            padding: 0 2rem;
+        }
+
+        .faq-item {
+            background: var(--surface-lowest);
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question {
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Manrope', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            user-select: none;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            padding: 0 2rem;
+            color: #6b7172;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .faq-item.active {
+            border-color: var(--primary-container);
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+            padding-bottom: 1.5rem;
+        }
+
+        .faq-arrow {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+            color: var(--primary);
+        }
+
+        .faq-item.active .faq-arrow {
+            transform: rotate(180deg);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            cursor: pointer;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            color: var(--on-surface);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        /* --- GUIDE SECTION --- */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .guide-section {
+            background-color: var(--surface-lowest);
+            padding: 4rem 0 2rem 0;
+        }
+
+        .pill-badge-light {
+            display: inline-block;
+            background-color: rgba(74, 64, 224, 0.1);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 2rem 0;
+            gap: 2rem;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 240px;
+            height: 2px;
+            background: var(--surface-high);
+            z-index: 1;
+        }
+
+        .progress-dots {
+            display: flex;
+            gap: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .dot {
+            width: 24px;
+            height: 24px;
+            background: var(--surface-lowest);
+            border: 2px solid var(--surface-high);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #abadae;
+        }
+
+        .dot.active {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem 4rem;
+            margin-top: 4rem;
+        }
+
+        .guide-step {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .step-number {
+            font-family: 'Manrope', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            opacity: 0.2;
+            line-height: 1;
+        }
+
+        .step-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--on-surface);
+        }
+
+        .step-title-badge {
+            display: inline-block;
+            margin-left: 0.5rem;
+            background: #e05050;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+            vertical-align: middle;
+            line-height: 1.2;
+        }
+
+        .step-desc {
+            color: #6b7172;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .screenshot-placeholder {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            background-color: #eff1f2;
+            overflow: hidden;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #abadae;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .screenshot-placeholder svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .info-box {
+            background-color: rgba(74, 64, 224, 0.05);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            margin-top: 4rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .info-box p {
+            color: var(--on-surface);
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            .progress-line {
+                width: 180px;
+            }
+            .progress-indicator {
+                gap: 1rem;
+            }
+            .progress-dots {
+                gap: 1rem;
+            }
+        }
+    </style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1972049048294019" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <div class="container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+            <a href="#" class="logo">UnfollowerSpy</a>
+            <div style="display: flex; align-items: center;">
+                <div class="pill-badge">100% Private &middot; No Login</div>
+                <a class="nav-link" onclick="showFAQ()">FAQ</a>
+            </div>
+        </div>
+        <div class="scroll-progress-container">
+            <div class="scroll-progress-bar" id="scrollProgress"></div>
+        </div>
+    </nav>
+
+    <!-- FAQ PAGE (Hidden by default) -->
+    <section id="faq-page">
+        <div class="faq-container">
+            <div class="back-link" onclick="hideFAQ()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Back to Audit
+            </div>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">What is UnfollowerSpy <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">UnfollowerSpy is a free tool that shows you which Instagram accounts you follow that do not follow you back. It works by analysing your Instagram data export file entirely in your browser. We never see your data.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Do I need to log in to use this <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">No. UnfollowerSpy requires zero login and zero Instagram credentials. You simply upload the data file Instagram provides you and we analyse it locally on your device.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Is my data safe <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">Yes completely. Your zip file is processed entirely in your browser using JavaScript. The file is never uploaded to any server. We never see, store, or transmit your Instagram data.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">How do I get my Instagram data file <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">Go to Instagram, tap your profile, tap the three lines, go to Settings and privacy, tap Your activity, tap Download your information, select Some of your information, deselect all then select only Followers and Following, set format to JSON and date range to All time, tap Create files and wait for the file to be generated.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">How long does Instagram take to send the file <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">Usually between 10 and 30 minutes. You can find your download directly in the 'Export your information' section of Account Centre once it's ready.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Why does my following count look higher than on Instagram <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">Instagram data exports include pending follow requests and some deactivated accounts in addition to your active follows. This can make the number slightly higher than what Instagram shows in the app.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Why do some accounts show as not following back when they might be deleted <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">Instagram does not clearly mark deleted accounts in the data export. Accounts that were deleted after you followed them may appear in your results. These are genuine accounts that no longer exist on Instagram.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Can I see who unfollowed me recently <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">Not directly. Instagram does not include data about who unfollowed you in their export. UnfollowerSpy can only show who is currently not following you back based on your latest data file.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">How often should I check <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">Whenever you want an updated view of your followers. Download a fresh data file from Instagram and upload it here for the latest results.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Is UnfollowerSpy free <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">Yes completely free with no hidden charges, no subscription, and no premium tier. All results are shown for free.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Will Instagram know I used this tool <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                    <div class="faq-answer">No. UnfollowerSpy only reads a file you downloaded. It does not connect to Instagram, does not access your account, and Instagram has no way of knowing you used this tool.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="hero-upload">
+        <div class="container asymmetric-grid">
+            <div class="hero-left">
+                <span class="hero-label">Instagram Audit Tool</span>
+                <h1 class="hero-title">Discover who isn't following you back.</h1>
+                <p class="hero-sub">Upload your Instagram data file. We'll handle the rest &mdash; privately, instantly, for free.</p>
+                <div class="trust-badges">
+                    <span class="trust-badge">🔒 No login required</span>
+                    <span class="trust-badge">⚡ Instant results</span>
+                    <span class="trust-badge">🛡️ Data never stored</span>
+                </div>
+                <div style="margin-top: 3rem;">
+                    <button class="btn-primary" onclick="document.getElementById('file-input').click()">
+                        <span>Select ZIP File</span>
+                    </button>
+                    <input type="file" id="file-input" accept=".zip">
+                    <p style="margin-top: 1rem; font-size: 0.75rem; color: #6b7172; font-weight: 400; opacity: 0.8;">or drag and drop your .zip file here</p>
+                </div>
+            </div>
+            <div class="hero-right">
+                <svg width="100%" viewBox="-40 -40 760 520" xmlns="http://www.w3.org/2000/svg"><g transform="translate(340,220) rotate(-4) translate(-240,-190)"><rect x="0" y="0" width="480" height="380" rx="28" fill="#ffffff" style="filter:drop-shadow(0 20px 60px rgba(0,0,0,0.10))"/><rect x="0" y="0" width="480" height="52" rx="28" fill="#f5f5f5"/><rect x="0" y="28" width="480" height="24" fill="#f5f5f5"/><rect x="20" y="14" width="22" height="22" rx="6" fill="none" stroke="#833ab4" stroke-width="2"/><circle cx="31" cy="25" r="5" fill="none" stroke="#833ab4" stroke-width="1.8"/><circle cx="38" cy="18" r="1.5" fill="#833ab4"/><rect x="50" y="19" width="70" height="8" rx="4" fill="#2c2f30" opacity="0.8"/><rect x="50" y="30" width="45" height="5" rx="2.5" fill="#2c2f30" opacity="0.25"/><rect x="340" y="14" width="120" height="26" rx="13" fill="#833ab4" opacity="0.12"/><rect x="356" y="21" width="88" height="12" rx="6" fill="#833ab4" opacity="0.5"/><line x1="0" y1="52" x2="480" y2="52" stroke="#f0f0f0" stroke-width="1"/><g opacity="0.38"><circle cx="36" cy="90" r="22" fill="#e8e8e8"/><circle cx="29" cy="86" r="3" fill="#bbb"/><circle cx="43" cy="86" r="3" fill="#bbb"/><path d="M29 97 Q36 93 43 97" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round"/><rect x="68" y="76" width="110" height="11" rx="5.5" fill="#2c2f30" opacity="0.5"/><rect x="68" y="93" width="75" height="8" rx="4" fill="#2c2f30" opacity="0.2"/><rect x="340" y="78" width="122" height="24" rx="12" fill="#ff3b5c" opacity="0.12"/><rect x="356" y="85" width="90" height="10" rx="5" fill="#ff3b5c" opacity="0.45"/></g><line x1="196" y1="78" x2="210" y2="102" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round" opacity="0.7"/><line x1="210" y1="78" x2="196" y2="102" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round" opacity="0.7"/><line x1="24" y1="118" x2="456" y2="118" stroke="#f5f5f5" stroke-width="1"/><g opacity="0.38"><circle cx="36" cy="152" r="22" fill="#e0dde8"/><circle cx="29" cy="148" r="3" fill="#9b8ec4"/><circle cx="43" cy="148" r="3" fill="#9b8ec4"/><path d="M29 160 Q36 156 43 160" fill="none" stroke="#9b8ec4" stroke-width="1.8" stroke-linecap="round"/><rect x="68" y="138" width="130" height="11" rx="5.5" fill="#2c2f30" opacity="0.5"/><rect x="68" y="155" width="85" height="8" rx="4" fill="#2c2f30" opacity="0.2"/><rect x="340" y="140" width="122" height="24" rx="12" fill="#ff3b5c" opacity="0.12"/><rect x="356" y="147" width="90" height="10" rx="5" fill="#ff3b5c" opacity="0.45"/></g><line x1="196" y1="140" x2="210" y2="164" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round" opacity="0.7"/><line x1="210" y1="140" x2="196" y2="164" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round" opacity="0.7"/><line x1="24" y1="180" x2="456" y2="180" stroke="#f5f5f5" stroke-width="1"/><circle cx="36" cy="214" r="22" fill="#4a40e0" opacity="0.15"/><circle cx="36" cy="214" r="22" fill="none" stroke="#4a40e0" stroke-width="2"/><circle cx="29" cy="210" r="3" fill="#4a40e0"/><circle cx="43" cy="210" r="3" fill="#4a40e0"/><path d="M28 221 Q36 228 44 221" fill="none" stroke="#4a40e0" stroke-width="2" stroke-linecap="round"/><rect x="68" y="200" width="120" height="11" rx="5.5" fill="#2c2f30" opacity="0.85"/><rect x="68" y="217" width="80" height="8" rx="4" fill="#2c2f30" opacity="0.3"/><rect x="330" y="202" width="132" height="24" rx="12" fill="#4a40e0" opacity="0.1"/><rect x="346" y="209" width="100" height="10" rx="5" fill="#4a40e0" opacity="0.5"/><path d="M194 213 L200 219 L212 205" fill="none" stroke="#4a40e0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="24" y1="242" x2="456" y2="242" stroke="#f5f5f5" stroke-width="1"/><g opacity="0.38"><circle cx="36" cy="276" r="22" fill="#f0e8e8"/><circle cx="29" cy="272" r="3" fill="#c49494"/><circle cx="43" cy="272" r="3" fill="#c49494"/><path d="M29 284 Q36 280 43 284" fill="none" stroke="#c49494" stroke-width="1.8" stroke-linecap="round"/><rect x="68" y="262" width="95" height="11" rx="5.5" fill="#2c2f30" opacity="0.5"/><rect x="68" y="279" width="65" height="8" rx="4" fill="#2c2f30" opacity="0.2"/><rect x="340" y="264" width="122" height="24" rx="12" fill="#ff3b5c" opacity="0.12"/><rect x="356" y="271" width="90" height="10" rx="5" fill="#ff3b5c" opacity="0.45"/></g><line x1="196" y1="264" x2="210" y2="288" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round" opacity="0.7"/><line x1="210" y1="264" x2="196" y2="288" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round" opacity="0.7"/><line x1="24" y1="304" x2="456" y2="304" stroke="#f5f5f5" stroke-width="1"/><g opacity="0.38"><circle cx="36" cy="338" r="22" fill="#e8e8f0"/><circle cx="29" cy="334" r="3" fill="#9494c4"/><circle cx="43" cy="334" r="3" fill="#9494c4"/><path d="M29 346 Q36 342 43 346" fill="none" stroke="#9494c4" stroke-width="1.8" stroke-linecap="round"/><rect x="68" y="324" width="140" height="11" rx="5.5" fill="#2c2f30" opacity="0.5"/><rect x="68" y="341" width="90" height="8" rx="4" fill="#2c2f30" opacity="0.2"/><rect x="340" y="326" width="122" height="24" rx="12" fill="#ff3b5c" opacity="0.12"/><rect x="356" y="333" width="90" height="10" rx="5" fill="#ff3b5c" opacity="0.45"/></g><line x1="196" y1="326" x2="210" y2="350" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round" opacity="0.7"/><line x1="210" y1="326" x2="196" y2="350" stroke="#ff3b5c" stroke-width="2" stroke-linecap="round" opacity="0.7"/></g><rect x="490" y="28" width="148" height="44" rx="22" fill="#ff3b5c"/><rect x="510" y="38" width="108" height="10" rx="5" fill="white" opacity="0.95"/><rect x="522" y="52" width="84" height="8" rx="4" fill="white" opacity="0.65"/><rect x="42" y="340" width="136" height="44" rx="22" fill="#4a40e0"/><rect x="58" y="350" width="104" height="10" rx="5" fill="white" opacity="0.95"/><rect x="66" y="364" width="88" height="8" rx="4" fill="white" opacity="0.65"/></svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- GUIDE SECTION -->
+    <section class="guide-section" id="guide-section">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <span class="pill-badge-light">Takes about 5 minutes</span>
+                <h2 class="section-title" style="margin-top: 1rem; font-family: 'Manrope', sans-serif; font-weight: 700;">How to get your Instagram file</h2>
+                
+                <div class="progress-indicator">
+                    <div class="progress-line"></div>
+                    <div class="progress-dots">
+                        <div class="dot active">1</div>
+                        <div class="dot">2</div>
+                        <div class="dot">3</div>
+                        <div class="dot">4</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="steps-grid">
+                <!-- Step 1 -->
+                <div class="guide-step">
+                    <div class="step-header">
+                        <span class="step-number">1</span>
+                        <h3 class="step-title">Open Instagram Settings</h3>
+                    </div>
+                    <p class="step-desc">Open Instagram, go to your profile, tap the three lines in the top right, tap Settings and privacy, then tap Account Centre at the bottom.</p>
+                    <div class="screenshot-placeholder">
+                        <svg width="100%" viewBox="0 0 390 420" xmlns="http://www.w3.org/2000/svg"><rect width="390" height="420" fill="#1a1a1a"/><rect x="0" y="0" width="390" height="44" fill="#1a1a1a"/><rect x="0" y="44" width="390" height="52" fill="#1a1a1a"/><path d="M28 70 L18 70 M18 70 L24 64 M18 70 L24 76" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="195" y="76" text-anchor="middle" font-family="system-ui, sans-serif" font-size="17" font-weight="600" fill="#ffffff">Settings and activity</text><rect x="16" y="104" width="358" height="36" rx="10" fill="#2c2c2e"/><text x="52" y="127" font-family="system-ui, sans-serif" font-size="16" fill="#636366">Search</text><circle cx="35" cy="122" r="7" fill="none" stroke="#636366" stroke-width="1.5"/><line x1="40" y1="127" x2="44" y2="131" stroke="#636366" stroke-width="1.5" stroke-linecap="round"/><text x="16" y="162" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#8e8e93">Your account</text><text x="374" y="162" text-anchor="end" font-family="system-ui, sans-serif" font-size="12" fill="#8e8e93">&infin; Meta</text><rect x="0" y="170" width="390" height="86" fill="#3a1a1a"/><rect x="0" y="170" width="4" height="86" fill="#e05050"/><circle cx="36" cy="213" r="16" fill="#5c2020"/><circle cx="36" cy="208" r="6" fill="none" stroke="#e05050" stroke-width="1.5"/><path d="M24 223 Q36 218 48 223" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round"/><text x="60" y="207" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#e05050">Accounts Center</text><text x="60" y="224" font-family="system-ui, sans-serif" font-size="12" fill="#a06060">Password, security, personal</text><text x="60" y="240" font-family="system-ui, sans-serif" font-size="12" fill="#a06060">details, connected experiences</text><text x="374" y="213" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#e05050">&rsaquo;</text><rect x="140" y="226" width="100" height="20" rx="10" fill="#e05050" opacity="0.75"/><text x="190" y="239" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#ffffff">Tap here</text><rect x="0" y="256" width="390" height="8" fill="#000000"/><text x="16" y="278" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#8e8e93">How you use Instagram</text><rect x="0" y="286" width="390" height="50" fill="#1a1a1a"/><rect x="16" y="302" width="22" height="20" rx="3" fill="none" stroke="#ffffff" stroke-width="1.5"/><path d="M22 302 L22 314 L27 310 L32 314 L32 302" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><text x="52" y="316" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Saved</text><text x="374" y="316" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text><line x1="52" y1="336" x2="390" y2="336" stroke="#2c2c2e" stroke-width="0.5"/><rect x="0" y="336" width="390" height="50" fill="#1a1a1a"/><circle cx="27" cy="361" r="10" fill="none" stroke="#ffffff" stroke-width="1.5"/><path d="M22 361 Q27 356 32 361" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/><text x="52" y="366" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Archive</text><text x="374" y="366" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text><line x1="52" y1="386" x2="390" y2="386" stroke="#2c2c2e" stroke-width="0.5"/><rect x="0" y="386" width="390" height="50" fill="#1a1a1a"/><rect x="16" y="398" width="22" height="22" rx="3" fill="none" stroke="#ffffff" stroke-width="1.5"/><path d="M20 412 L24 408 L28 414 L33 404" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><text x="52" y="416" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Your activity</text><text x="374" y="416" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text><line x1="52" y1="436" x2="390" y2="436" stroke="#2c2c2e" stroke-width="0.5"/><rect x="0" y="436" width="390" height="50" fill="#1a1a1a"/><path d="M27 453 Q27 447 27 447 A10 10 0 0 1 37 457 L37 463 L40 466 L14 466 L17 463 L17 457 A10 10 0 0 1 27 447" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/><path d="M24 466 Q27 470 30 466" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/><text x="52" y="466" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Notifications</text><text x="374" y="466" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text><line x1="52" y1="486" x2="390" y2="486" stroke="#2c2c2e" stroke-width="0.5"/><rect x="0" y="486" width="390" height="50" fill="#1a1a1a"/><circle cx="27" cy="511" r="10" fill="none" stroke="#ffffff" stroke-width="1.5"/><line x1="27" y1="505" x2="27" y2="511" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/><line x1="27" y1="511" x2="32" y2="514" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/><text x="52" y="516" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Time management</text><text x="374" y="516" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text><line x1="52" y1="536" x2="390" y2="536" stroke="#2c2c2e" stroke-width="0.5"/><rect x="0" y="536" width="390" height="50" fill="#1a1a1a"/><rect x="16" y="549" width="22" height="24" rx="3" fill="none" stroke="#ffffff" stroke-width="1.5"/><text x="52" y="566" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Instagram for iPad</text><circle cx="350" cy="561" r="4" fill="#4a40e0"/><text x="374" y="566" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text><rect x="0" y="586" width="390" height="8" fill="#000000"/><text x="16" y="608" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#8e8e93">Who can see your content</text><rect x="0" y="616" width="390" height="50" fill="#1a1a1a"/><rect x="21" y="629" width="12" height="16" rx="3" fill="none" stroke="#ffffff" stroke-width="1.5"/><path d="M24 629 L24 625 A3 3 0 0 1 30 625 L30 629" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/><text x="52" y="646" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Account privacy</text><text x="350" y="646" text-anchor="end" font-family="system-ui, sans-serif" font-size="14" fill="#636366">Private</text><text x="374" y="646" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text><line x1="52" y1="666" x2="390" y2="666" stroke="#2c2c2e" stroke-width="0.5"/><rect x="0" y="666" width="390" height="50" fill="#1a1a1a"/><circle cx="27" cy="691" r="10" fill="none" stroke="#ffffff" stroke-width="1.5"/><path d="M23 691 L26 694 L31 688" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><text x="52" y="696" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Close Friends</text><text x="374" y="696" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text></svg>
+                    </div>
+                </div>
+                <!-- Step 2 -->
+                <div class="guide-step">
+                    <div class="step-header">
+                        <span class="step-number">2</span>
+                        <h3 class="step-title">Find Export option</h3>
+                    </div>
+                    <p class="step-desc">Inside Account Centre tap Your information and permissions, then tap Export your information, then tap Create export, then tap Export to device.</p>
+                    <div class="screenshot-placeholder">
+                        <svg width="100%" viewBox="0 0 390 420" xmlns="http://www.w3.org/2000/svg"><rect width="390" height="500" fill="#1a1a1a"/><path d="M28 60 L18 60 M18 60 L24 54 M18 60 L24 66" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="30" y="110" font-family="system-ui, sans-serif" font-size="26" font-weight="700" fill="#ffffff">Your information and</text><text x="30" y="145" font-family="system-ui, sans-serif" font-size="26" font-weight="700" fill="#ffffff">permissions</text><text x="30" y="185" font-family="system-ui, sans-serif" font-size="14" fill="#8e8e93">To download or transfer a copy of your</text><text x="30" y="205" font-family="system-ui, sans-serif" font-size="14" fill="#8e8e93">information, go to Export your Information.</text><rect x="16" y="228" width="358" height="50" rx="10" fill="#3a1a1a"/><rect x="16" y="228" width="4" height="50" rx="2" fill="#e05050"/><text x="36" y="258" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#e05050">Export your information</text><rect x="352" y="240" width="16" height="16" rx="3" fill="none" stroke="#e05050" stroke-width="1.5"/><path d="M356 252 L364 244 M360 244 L364 244 L364 248" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="240" y="237" width="90" height="20" rx="10" fill="#e05050" opacity="0.85"/><text x="285" y="251" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#ffffff">tap here</text><rect x="16" y="280" width="358" height="50" rx="10" fill="#2c2c2e"/><text x="36" y="310" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Search history</text><text x="364" y="310" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text><rect x="0" y="342" width="390" height="6" fill="#000000"/><rect x="16" y="350" width="358" height="60" rx="10" fill="#2c2c2e"/><text x="36" y="376" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">Your activity off Meta</text><text x="36" y="396" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">technologies</text><text x="364" y="383" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text><rect x="16" y="416" width="358" height="50" rx="10" fill="#2c2c2e"/><text x="36" y="446" font-family="system-ui, sans-serif" font-size="16" fill="#ffffff">App connections</text><text x="364" y="446" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&rsaquo;</text></svg>
+                    </div>
+                </div>
+                <!-- Step 3 -->
+                <div class="guide-step">
+                    <div class="step-header">
+                        <span class="step-number">3</span>
+                        <h3 class="step-title">Select only what you need <span class="step-title-badge">IMPORTANT !</span></h3>
+                    </div>
+                    <p class="step-desc">Set Date range to All time and Format to JSON. Tap Deselect All in the Customise information section to clear everything, then select only Followers and Followed accounts.</p>
+                    <div class="screenshot-placeholder" style="overflow:hidden;max-width:100%;">
+                        <svg width="100%" viewBox="0 28 390 552" preserveAspectRatio="xMidYMid meet" style="max-width:100%;height:auto;display:block;" xmlns="http://www.w3.org/2000/svg"><rect width="390" height="580" fill="#ffffff"/><path d="M28 58 L18 58 M18 58 L24 52 M18 58 L24 64" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="16" y="74" width="358" height="65" rx="12" fill="#f7f7f7" stroke="#e8e8e8" stroke-width="0.5"/><circle cx="52" cy="106" r="20" fill="#d0d0d0"/><text x="52" y="111" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#777">U</text><text x="82" y="97" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1a1a1a">user</text><text x="82" y="113" font-family="system-ui, sans-serif" font-size="12" fill="#636366">Instagram</text><text x="82" y="129" font-family="system-ui, sans-serif" font-size="11" fill="#636366">Export to Device &#183; Once</text><rect x="16" y="150" width="358" height="52" rx="12" fill="#f7f7f7" stroke="#e8e8e8" stroke-width="0.5"/><text x="42" y="172" font-family="system-ui, sans-serif" font-size="14" font-weight="500" fill="#1a1a1a">Notify</text><text x="42" y="190" font-family="system-ui, sans-serif" font-size="11" fill="#636366">your@email.com</text><text x="364" y="178" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&#8250;</text><rect x="16" y="214" width="358" height="52" rx="12" fill="#f7f7f7" stroke="#e8e8e8" stroke-width="0.5"/><text x="42" y="235" font-family="system-ui, sans-serif" font-size="14" font-weight="500" fill="#1a1a1a">Customize information</text><rect x="42" y="241" width="160" height="18" rx="6" fill="#fde8e8"/><text x="122" y="254" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#e05050">Followers and following</text><text x="364" y="239" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&#8250;</text><path d="M210 250 L220 250" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round"/><path d="M210 250 L214 246 M210 250 L214 254" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round"/><text x="223" y="254" font-family="system-ui, sans-serif" font-size="10" fill="#e05050" font-weight="600">select this</text><rect x="16" y="278" width="358" height="52" rx="12" fill="#f7f7f7" stroke="#e8e8e8" stroke-width="0.5"/><text x="42" y="299" font-family="system-ui, sans-serif" font-size="14" font-weight="500" fill="#1a1a1a">Date range</text><rect x="42" y="305" width="62" height="18" rx="6" fill="#fde8e8"/><text x="73" y="318" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#e05050">All time</text><text x="364" y="307" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&#8250;</text><path d="M112 318 L122 318" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round"/><path d="M112 318 L116 314 M112 318 L116 322" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round"/><text x="125" y="322" font-family="system-ui, sans-serif" font-size="10" fill="#e05050" font-weight="600">set to this</text><rect x="16" y="342" width="358" height="52" rx="12" fill="#f7f7f7" stroke="#e8e8e8" stroke-width="0.5"/><text x="42" y="363" font-family="system-ui, sans-serif" font-size="14" font-weight="500" fill="#1a1a1a">Format</text><rect x="42" y="369" width="42" height="18" rx="6" fill="#fde8e8"/><text x="63" y="382" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#e05050">JSON</text><text x="364" y="371" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&#8250;</text><path d="M90 382 L100 382" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round"/><path d="M90 382 L94 378 M90 382 L94 386" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round"/><text x="103" y="386" font-family="system-ui, sans-serif" font-size="10" fill="#e05050" font-weight="600">set to this</text><rect x="16" y="406" width="358" height="52" rx="12" fill="#f7f7f7" stroke="#e8e8e8" stroke-width="0.5"/><text x="42" y="427" font-family="system-ui, sans-serif" font-size="14" font-weight="500" fill="#1a1a1a">Media quality</text><text x="42" y="446" font-family="system-ui, sans-serif" font-size="12" fill="#636366">Medium quality</text><text x="364" y="435" text-anchor="end" font-family="system-ui, sans-serif" font-size="16" fill="#636366">&#8250;</text><text x="195" y="476" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#8e8e93">This file may contain private information.</text><text x="195" y="492" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#8e8e93">Keep it secure when exporting.</text><rect x="16" y="508" width="358" height="48" rx="24" fill="#4a81f0"/><text x="195" y="537" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#ffffff">Start export</text></svg>
+                    </div>
+                </div>
+                <!-- Step 4 -->
+                <div class="guide-step">
+                    <div class="step-header">
+                        <span class="step-number">4</span>
+                        <h3 class="step-title">Download and come back</h3>
+                    </div>
+                    <p class="step-desc">Tap Create export and wait about 10 minutes. You can find your download directly in the 'Export your information' section of Account Centre. Download the zip file, then come back here and upload it.</p>
+                    <div class="screenshot-placeholder">
+                        <svg width="100%" viewBox="0 0 390 510" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="390" height="560" fill="#ffffff"/>
+
+                          <text x="30" y="60" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#1a1a1a">Export your information</text>
+
+                          <text x="30" y="90" font-family="system-ui, sans-serif" font-size="13" fill="#3a3a3a">You can export a copy of your information to an</text>
+                          <text x="30" y="108" font-family="system-ui, sans-serif" font-size="13" fill="#3a3a3a">external service, or export it to your device.</text>
+
+                          <rect x="30" y="128" width="330" height="46" rx="23" fill="#1a6ef5"/>
+                          <text x="195" y="156" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#ffffff">Create export</text>
+
+                          <text x="110" y="208" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#1a1a1a">Current activity</text>
+                          <line x1="55" y1="214" x2="165" y2="214" stroke="#1a1a1a" stroke-width="2"/>
+                          <text x="270" y="208" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#8e8e93">Past activity</text>
+
+                          <text x="30" y="248" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#1a1a1a">Available downloads</text>
+
+                          <rect x="24" y="265" width="342" height="210" rx="14" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+
+                          <circle cx="72" cy="330" r="30" fill="#d0d0d0"/>
+                          <text x="72" y="336" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#777">U</text>
+
+                          <circle cx="92" cy="351" r="9" fill="#ffffff"/>
+                          <circle cx="92" cy="351" r="7" fill="url(#igGrad)"/>
+                          <defs>
+                            <radialGradient id="igGrad" cx="30%" cy="100%" r="130%">
+                              <stop offset="0%" stop-color="#fdf497"/>
+                              <stop offset="45%" stop-color="#fd5949"/>
+                              <stop offset="60%" stop-color="#d6249f"/>
+                              <stop offset="90%" stop-color="#285AEB"/>
+                            </radialGradient>
+                          </defs>
+
+                          <text x="115" y="308" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#1a1a1a">02/01/05 – 03/29/26 specific</text>
+                          <text x="115" y="325" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#1a1a1a">information download</text>
+                          <text x="115" y="343" font-family="system-ui, sans-serif" font-size="12" fill="#3a3a3a">user</text>
+                          <text x="115" y="359" font-family="system-ui, sans-serif" font-size="12" fill="#636366">Instagram</text>
+                          <text x="115" y="375" font-family="system-ui, sans-serif" font-size="12" fill="#636366">Expires on Apr 2, 2026</text>
+                          <text x="115" y="391" font-family="system-ui, sans-serif" font-size="12" fill="#636366">Less than 1 MB</text>
+
+                          <rect x="36" y="408" width="148" height="40" rx="10" fill="#fde8e8"/>
+                          <text x="110" y="433" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="500" fill="#c0392b">Download</text>
+
+                          <rect x="192" y="418" width="68" height="18" rx="0" fill="none"/>
+                          <path d="M110 455 L110 448" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round"/>
+                          <path d="M110 448 L106 453 M110 448 L114 453" fill="none" stroke="#e05050" stroke-width="1.5" stroke-linecap="round"/>
+                          <text x="110" y="470" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#e05050" font-weight="600">click here</text>
+
+                          <rect x="196" y="408" width="148" height="40" rx="10" fill="#f0f0f0"/>
+                          <text x="270" y="433" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="500" fill="#3a3a3a">Cancel</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 3rem; margin-bottom: 2rem; padding-bottom: 0;">
+                <a href="#hero-upload" class="btn-primary" style="text-decoration: none;">
+                    <span>I have my file, take me to upload</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESULTS SECTION -->
+    <section class="container results-container" id="results">
+        <span class="section-label" style="color: var(--tertiary)">Audit Complete</span>
+        <div class="results-header">
+            <h2 class="section-title">The Unfollower Report</h2>
+            <button class="btn-ghost" onclick="startNewAudit()">Start New Audit</button>
+        </div>
+        <p class="results-note">Results may include deleted or deactivated accounts from your follow history.</p>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Followers</div>
+                <h3 class="stat-num" id="stat-followers">0</h3>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Following</div>
+                <h3 class="stat-num" id="stat-following">0</h3>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Non-Followers</div>
+                <h3 class="stat-num traitor" id="stat-traitors">0</h3>
+            </div>
+        </div>
+
+        <div class="filter-group" id="time-filters">
+            <button class="filter-btn" data-days="90">Last 3 months</button>
+            <button class="filter-btn" data-days="180">Last 6 months</button>
+            <button class="filter-btn" data-days="365">Last 1 year</button>
+            <button class="filter-btn active" data-days="all">All time</button>
+        </div>
+
+        <div class="controls-row">
+            <div class="search-container">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="user-search" class="search-input" placeholder="Search usernames...">
+            </div>
+            <div class="sort-container">
+                <button class="sort-btn" id="sort-trigger">
+                    <span id="sort-text">Sort</span>
+                    <svg id="sort-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="sort-dropdown" id="sort-menu">
+                    <div class="sort-option" data-sort="asc">A to Z</div>
+                    <div class="sort-option" data-sort="desc">Z to A</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="user-list" id="traitor-list">
+            <!-- Items injected via JS -->
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <section style="padding: 4rem 0; border-top: 1px solid var(--surface-variant); margin-top: 0;">
+        <div class="container" style="text-align: center; color: #6b7172;">
+            <p>&copy; 2026 UnfollowerSpy. Privacy First. Local Processing only.</p>
+            <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 2rem;">
+                <a class="nav-link" style="margin: 0;" onclick="showFAQ()">FAQ</a>
+                <a href="about.html" class="nav-link" style="margin: 0;">About Us</a>
+                <a href="privacy-policy.html" class="nav-link" style="margin: 0;">Privacy Policy</a>
+                <a href="contact.html" class="nav-link" style="margin: 0;">Contact</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loader">
+        <div class="spinner"></div>
+        <p style="font-weight: 500;">Decompressing & analyzing...</p>
+    </div>
+
+    <script>
+        // --- FAQ Logic ---
+        const faqPage = document.getElementById('faq-page');
+        const mainHero = document.querySelector('.hero');
+        const mainHow = document.getElementById('guide-section');
+        const mainResults = document.getElementById('results');
+
+        function showFAQ() {
+            if (mainHero) mainHero.style.display = 'none';
+            if (mainHow) mainHow.style.display = 'none';
+            if (mainResults) mainResults.style.display = 'none';
+            if (faqPage) faqPage.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function hideFAQ() {
+            if (faqPage) faqPage.style.display = 'none';
+            // Determine which view to restore
+            const saved = sessionStorage.getItem('unfollowspy_results');
+            if (saved || (mainResults && mainResults.style.display === 'block')) {
+                if (mainResults) mainResults.style.display = 'block';
+            } else {
+                if (mainHero) mainHero.style.display = 'block';
+                if (mainHow) mainHow.style.display = 'block';
+            }
+            window.scrollTo(0, 0);
+        }
+
+        // Accordion logic
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                const item = q.parentElement;
+                const isActive = item.classList.contains('active');
+                
+                // Close all
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+                
+                // Toggle clicked
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // --- UI Logic ---
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            const scrollProgress = document.getElementById("scrollProgress");
+            if (scrollProgress) scrollProgress.style.width = scrolled + "%";
+        };
+
+        const fileInput = document.getElementById('file-input');
+        const loader = document.getElementById('loader');
+        const resultsView = document.getElementById('results');
+        const heroView = document.querySelector('.hero');
+        const howView = document.getElementById('guide-section');
+        const searchInput = document.getElementById('user-search');
+        const sortTrigger = document.getElementById('sort-trigger');
+        const sortMenu = document.getElementById('sort-menu');
+        let globalTraitors = []; // Array of {username, timestamp}
+        let currentSort = 'asc';
+
+        if (searchInput) searchInput.addEventListener('input', applyFilters);
+
+        // Sort trigger logic
+        if (sortTrigger && sortMenu) {
+            sortTrigger.addEventListener('click', (e) => {
+                sortMenu.classList.toggle('show');
+                e.stopPropagation();
+            });
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', () => {
+            if (sortMenu) sortMenu.classList.remove('show');
+        });
+
+        // Sort option logic
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', () => {
+                currentSort = option.dataset.sort;
+                applyFilters();
+                if (sortMenu) sortMenu.classList.remove('show');
+            });
+        });
+
+        // Load saved results on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = sessionStorage.getItem('unfollowspy_results');
+            if (saved) {
+                const data = JSON.parse(saved);
+                globalTraitors = data.traitors || [];
+                displayResults(data.followerCount, data.followingCount, true);
+            }
+        });
+
+        function startNewAudit() {
+            sessionStorage.removeItem('unfollowspy_results');
+            location.reload();
+        }
+
+        async function processZipFile(file) {
+            if (!file) return;
+            if (loader) loader.style.display = 'flex';
+
+            try {
+                const zip = await JSZip.loadAsync(file);
+                const allFiles = Object.keys(zip.files);
+                
+                const followerFile = allFiles.find(path => path.endsWith('followers_1.json'));
+                const followingFile = allFiles.find(path => path.endsWith('following.json'));
+                const pendingFile = allFiles.find(path => path.endsWith('pending_follow_requests.json'));
+
+                if (!followerFile || !followingFile) {
+                    throw new Error("Could not find followers or following JSON files. Ensure you selected JSON format when downloading.");
+                }
+
+                allFiles.forEach(f => console.log("File found in ZIP:", f));
+
+                const followersRaw = await zip.file(followerFile).async("string");
+                const followingRaw = await zip.file(followingFile).async("string");
+                let pendingRaw = "[]";
+                if (pendingFile) pendingRaw = await zip.file(pendingFile).async("string");
+                
+                const followersData = JSON.parse(followersRaw);
+                const followingData = JSON.parse(followingRaw);
+                const pendingData = JSON.parse(pendingRaw);
+
+                const getList = (data, key) => {
+                    const base = data[key] || data;
+                    if (!Array.isArray(base)) return [];
+                    const list = [];
+                    base.forEach(item => {
+                        if (item && item.string_list_data && item.string_list_data[0]) {
+                            const inner = item.string_list_data[0];
+                            const username = (item.title || inner.value || "").trim();
+                            const href = (inner.href || "").trim();
+                            const timestamp = inner.timestamp || 0;
+
+                            const isDeleted = username.toLowerCase().includes('__deleted__');
+                            
+                            if (username !== "" && href !== "" && !isDeleted) {
+                                list.push({ username, timestamp });
+                            }
+                        }
+                    });
+                    return list;
+                };
+
+                const followers = getList(followersData, 'relationships_followers').map(u => u.username);
+                const following = getList(followingData, 'relationships_following');
+                const pending = getList(pendingData, 'relationships_follow_requests_sent').map(u => u.username);
+
+                const followerSet = new Set(followers);
+                const pendingSet = new Set(pending);
+                
+                globalTraitors = following
+                    .filter(user => !followerSet.has(user.username) && !pendingSet.has(user.username))
+                    .map(user => ({
+                        username: user.username,
+                        timestamp: user.timestamp * 1000
+                    }));
+
+                applyFilters(); // Apply initial sorting and rendering
+
+                displayResults(followers.length, following.length - pending.length);
+
+            } catch (err) {
+                alert("Error parsing file: " + err.message);
+                console.error(err);
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
+        }
+
+        if (fileInput) fileInput.addEventListener('change', (e) => processZipFile(e.target.files[0]));
+
+        // Drag and drop logic
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            if (heroView) {
+                heroView.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            }
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            if (heroView) {
+                heroView.addEventListener(eventName, () => {
+                    if (heroView) heroView.style.backgroundColor = 'var(--surface-high)';
+                }, false);
+            }
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            if (heroView) {
+                heroView.addEventListener(eventName, () => {
+                    if (heroView) heroView.style.backgroundColor = 'var(--surface)';
+                }, false);
+            }
+        });
+
+        if (heroView) {
+            heroView.addEventListener('drop', (e) => {
+                const file = e.dataTransfer.files[0];
+                processZipFile(file);
+            }, false);
+        }
+
+        // Time filter logic
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyFilters();
+            });
+        });
+
+        function applyFilters() {
+            const activeBtn = document.querySelector('.filter-btn.active');
+            const days = activeBtn ? activeBtn.dataset.days : 'all';
+            const query = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            let filtered = [...globalTraitors]; // Work on a copy
+
+            // Apply time filter
+            if (days !== 'all') {
+                const cutoff = Date.now() - (parseInt(days) * 24 * 60 * 60 * 1000);
+                filtered = filtered.filter(u => u.timestamp >= cutoff);
+            }
+
+            // Apply search filter
+            if (query) {
+                filtered = filtered.filter(u => u.username.toLowerCase().includes(query));
+            }
+
+            // SORTING LOGIC
+            // Alphabetical A-Z, then others
+            filtered.sort((a, b) => {
+                const aStartLetter = /^[a-z]/i.test(a.username);
+                const bStartLetter = /^[a-z]/i.test(b.username);
+                
+                let cmp = 0;
+                if (aStartLetter && !bStartLetter) cmp = -1;
+                else if (!aStartLetter && bStartLetter) cmp = 1;
+                else cmp = a.username.toLowerCase().localeCompare(b.username.toLowerCase());
+                
+                return currentSort === 'asc' ? cmp : -cmp;
+            });
+
+            renderUserList(filtered);
+            const statTraitors = document.getElementById('stat-traitors');
+            if (statTraitors) statTraitors.innerText = filtered.length;
+        }
+
+        function renderUserList(results) {
+            const listEl = document.getElementById('traitor-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+
+            if (results.length === 0) {
+                listEl.innerHTML = '<div style="padding: 4rem; text-align: center; color: #6b7172;">No matches found.</div>';
+                return;
+            }
+
+            // Calculate dynamic interval: 15% of total, minimum 20, maximum 40
+            const total = results.length;
+            let interval = Math.floor(total * 0.15);
+            if (interval < 20) interval = 20;
+            if (interval > 40) interval = 40;
+
+            results.forEach((user, index) => {
+                const item = document.createElement('div');
+                item.className = 'user-item';
+                item.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">${user.username.charAt(0).toUpperCase()}</div>
+                        <div class="handle-stack">
+                            <span class="user-handle">@${user.username}</span>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <span class="status-pill desktop-only hide-mobile">NOT FOLLOWING BACK</span>
+                        <a href="https://instagram.com/${user.username}" target="_blank" class="btn-view">View Profile</a>
+                    </div>
+                `;
+                listEl.appendChild(item);
+
+                // Insert ad placeholder after every interval and at the very end
+                const currentPos = index + 1;
+                if (currentPos % interval === 0 || currentPos === total) {
+                    const comment = document.createComment(" replace this div with your Google AdSense in-article ad unit code ");
+                    const adDiv = document.createElement('div');
+                    adDiv.className = 'adsense-placeholder';
+                    adDiv.innerText = 'Advertisement';
+                    
+                    listEl.appendChild(comment);
+                    listEl.appendChild(adDiv);
+                }
+            });
+        }
+
+        function displayResults(followerCount, followingCount, skipSave = false) {
+            // Persist results
+            if (!skipSave) {
+                sessionStorage.setItem('unfollowspy_results', JSON.stringify({
+                    followerCount,
+                    followingCount,
+                    traitors: globalTraitors
+                }));
+            }
+
+            // Show results first to ensure DOM elements are ready/visible for any layout checks
+            if (heroView) heroView.style.display = 'none';
+            if (howView) howView.style.display = 'none';
+            if (resultsView) resultsView.style.display = 'block';
+            
+            const statFollowers = document.getElementById('stat-followers');
+            const statFollowing = document.getElementById('stat-following');
+            if (statFollowers) statFollowers.innerText = followerCount;
+            if (statFollowing) statFollowing.innerText = followingCount;
+            
+            applyFilters();
+            window.scrollTo(0, 0);
+        }
+</script>
+</body>
+</html>

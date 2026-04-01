@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us &mdash; UnfollowerSpy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a40e0;
+            --primary-container: #9795ff;
+            --primary-dim: #3d30d4;
+            --secondary: #6249b2;
+            --surface: #f5f6f7;
+            --surface-low: #eff1f2;
+            --surface-lowest: #ffffff;
+            --surface-variant: #dadddf;
+            --on-surface: #2c2f30;
+            --shadow-soft: 0 12px 40px rgba(44, 47, 48, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 800;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(245, 246, 247, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            font-family: 'Manrope', sans-serif;
+            text-decoration: none;
+        }
+
+        .pill-badge {
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            color: var(--on-surface);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        section {
+            padding: 5rem 0;
+        }
+
+        .hero {
+            padding: 4rem 0 3rem;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .eyebrow {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--primary);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .hero-title {
+            font-size: 3.2rem;
+            line-height: 1.05;
+            margin-bottom: 1rem;
+            max-width: 680px;
+        }
+
+        .hero-sub {
+            font-size: 1.05rem;
+            color: #6b7172;
+            max-width: 560px;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, rgba(74, 64, 224, 0.08), rgba(98, 73, 178, 0.14));
+            border: 1px solid rgba(74, 64, 224, 0.12);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .hero-card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-card p {
+            color: #555d5f;
+        }
+
+        .content-shell {
+            padding-bottom: 4rem;
+        }
+
+        .stack {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: var(--surface-lowest);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            padding: 2rem;
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .panel p + p {
+            margin-top: 0.9rem;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        .step {
+            background: var(--surface-low);
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+        }
+
+        .step-num {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            margin-bottom: 0.85rem;
+        }
+
+        .step h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, rgba(74, 64, 224, 0.08), rgba(74, 64, 224, 0.03));
+            border: 1px solid rgba(74, 64, 224, 0.12);
+        }
+
+        .contact-box {
+            margin-top: 1rem;
+            background: var(--surface-low);
+            border-radius: 1rem;
+            padding: 1.25rem;
+        }
+
+        section.footer {
+            padding: 4rem 0;
+            border-top: 1px solid var(--surface-variant);
+            margin-top: 0;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .pill-badge {
+                display: none;
+            }
+
+            .hero-grid,
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            section {
+                padding: 3.5rem 0;
+            }
+        }
+    </style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1972049048294019" crossorigin="anonymous"></script>
+</head>
+<body>
+    <nav>
+        <div class="container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+            <a href="index.html" class="logo">UnfollowerSpy</a>
+            <div style="display: flex; align-items: center;">
+                <div class="pill-badge">100% Private &middot; No Login</div>
+                <a href="index.html" class="nav-link">Back to Audit</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container hero-grid">
+            <div>
+                <span class="eyebrow">About Us</span>
+                <h1 class="hero-title">About UnfollowerSpy</h1>
+                <p class="hero-sub">Built for people who value honesty on social media.</p>
+            </div>
+            <div class="hero-card">
+                <h2>What we stand for</h2>
+                <p>Clear answers, no Instagram login, no hidden storage, and no unnecessary friction. The product exists to help people understand their audience without giving up control of their data.</p>
+            </div>
+        </div>
+    </section>
+
+    <main class="content-shell">
+        <div class="container stack">
+            <section class="panel">
+                <h2>Our Mission</h2>
+                <p>UnfollowerSpy exists to give people transparency over their Instagram following in a way that is private, simple, and free. Social media relationships are often opaque by design. We built a tool that gives users a direct answer without asking them to trust another service with their account credentials.</p>
+            </section>
+
+            <section class="panel">
+                <h2>How It Works</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <h3>Upload your data file</h3>
+                        <p>Download your Instagram export and upload the zip file directly into the tool.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <h3>We analyse it in your browser</h3>
+                        <p>The file is processed locally on your device rather than sent to our servers.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <h3>See who does not follow you back</h3>
+                        <p>The tool compares your followers and following lists and shows the difference clearly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>Why We Built This</h2>
+                <p>Instagram used to make follower relationships feel simpler. Over time, the product moved away from giving people an easy, direct way to see who had unfollowed them or who never followed back in the first place. That gap created a wave of risky third-party apps asking for Instagram logins and broad permissions.</p>
+                <p>We did not think that tradeoff was acceptable. People should not have to hand over their account credentials just to get a basic answer about their own network. So we built a free, private alternative that requires no login and stores nothing.</p>
+            </section>
+
+            <section class="panel highlight">
+                <h2>Privacy First</h2>
+                <p>Your Instagram data does not leave the browser while the audit runs. No Instagram login is required. No follower lists are stored on our servers. The product is intentionally built around local processing so you can use it without giving up control of your account data.</p>
+            </section>
+
+            <section class="panel">
+                <h2>Contact &amp; Feedback</h2>
+                <p>If you have a bug report, suggestion, or feedback about how the tool should improve, send a note. We read product feedback closely because the best version of this site is the one that stays useful without becoming invasive.</p>
+                <div class="contact-box">
+                    <p><strong>Email:</strong> unfollowerspy@gmail.com</p>
+                    <p><strong>Subject line:</strong> About UnfollowerSpy</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <section class="footer">
+        <div class="container" style="text-align: center; color: #6b7172;">
+            <p>&copy; 2026 UnfollowerSpy. Privacy First. Local Processing only.</p>
+            <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 2rem;">
+                <a href="index.html" class="nav-link" style="margin: 0;">Home</a>
+                <a href="about.html" class="nav-link" style="margin: 0;">About Us</a>
+                <a href="privacy-policy.html" class="nav-link" style="margin: 0;">Privacy Policy</a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
