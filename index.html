@@ -1451,63 +1451,130 @@
             location.reload();
         }
 
+        function extractUsernames(data) {
+            let entries = [];
+
+            if (Array.isArray(data)) {
+                entries = data;
+            } else if (data && typeof data === 'object') {
+                for (const key of Object.keys(data)) {
+                    if (Array.isArray(data[key])) {
+                        entries = data[key];
+                        break;
+                    }
+                }
+            }
+
+            if (!Array.isArray(entries)) return [];
+
+            const users = [];
+            entries.forEach(entry => {
+                if (!entry || typeof entry !== 'object') return;
+
+                const stringData = Array.isArray(entry.string_list_data) ? entry.string_list_data[0] : null;
+                const username = String(entry.title || (stringData && stringData.value) || "").trim();
+                const href = String((stringData && stringData.href) || "").trim();
+                const timestamp = Number((stringData && stringData.timestamp) || 0);
+
+                if (!username || !href) return;
+                if (username.toLowerCase().includes('deleted')) return;
+
+                users.push({ username, timestamp });
+            });
+
+            return users;
+        }
+
         async function processZipFile(file) {
             if (!file) return;
             if (loader) loader.style.display = 'flex';
 
             try {
                 const zip = await JSZip.loadAsync(file);
-                const allFiles = Object.keys(zip.files);
+                const zipEntries = Object.values(zip.files);
 
-                const followerFile = allFiles.find(path => path.endsWith('followers_1.json'));
-                const followingFile = allFiles.find(path => path.endsWith('following.json'));
-                const pendingFile = allFiles.find(path => path.endsWith('pending_follow_requests.json'));
+                zipEntries.forEach(entry => console.log("File found in ZIP:", entry.name));
 
-                if (!followerFile || !followingFile) {
-                    throw new Error("Could not find followers or following JSON files. Ensure you selected JSON format when downloading.");
+                const candidateEntries = zipEntries.filter(entry => {
+                    if (entry.dir) return false;
+
+                    const lowerName = entry.name.toLowerCase();
+                    if (!lowerName.endsWith('.json')) return false;
+
+                    if (typeof entry._data === 'object' && entry._data && typeof entry._data.uncompressedSize === 'number' && entry._data.uncompressedSize > 5 * 1024 * 1024) {
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                const followerFiles = candidateEntries.filter(entry => {
+                    const fileName = entry.name.split('/').pop().toLowerCase();
+                    return fileName.includes('followers') && fileName.endsWith('.json');
+                });
+
+                const followingFiles = candidateEntries.filter(entry => {
+                    const fileName = entry.name.split('/').pop().toLowerCase();
+                    return fileName === 'following.json';
+                });
+
+                const followerMap = new Map();
+                const followingMap = new Map();
+
+                for (const entry of followerFiles) {
+                    try {
+                        const raw = await entry.async("string");
+                        if (raw.length > 5 * 1024 * 1024) {
+                            console.warn("Skipping oversized JSON file:", entry.name);
+                            continue;
+                        }
+
+                        const parsed = JSON.parse(raw);
+                        const users = extractUsernames(parsed);
+                        users.forEach(user => {
+                            if (!followerMap.has(user.username)) {
+                                followerMap.set(user.username, user);
+                            }
+                        });
+                    } catch (err) {
+                        console.warn("Failed to parse follower file:", entry.name, err);
+                    }
                 }
 
-                allFiles.forEach(f => console.log("File found in ZIP:", f));
-
-                const followersRaw = await zip.file(followerFile).async("string");
-                const followingRaw = await zip.file(followingFile).async("string");
-                let pendingRaw = "[]";
-                if (pendingFile) pendingRaw = await zip.file(pendingFile).async("string");
-                
-                const followersData = JSON.parse(followersRaw);
-                const followingData = JSON.parse(followingRaw);
-                const pendingData = JSON.parse(pendingRaw);
-
-                const getList = (data, key) => {
-                    const base = data[key] || data;
-                    if (!Array.isArray(base)) return [];
-                    const list = [];
-                    base.forEach(item => {
-                        if (item && item.string_list_data && item.string_list_data[0]) {
-                            const inner = item.string_list_data[0];
-                            const username = (item.title || inner.value || "").trim();
-                            const href = (inner.href || "").trim();
-                            const timestamp = inner.timestamp || 0;
-
-                            const isDeleted = username.toLowerCase().includes('__deleted__');
-                            
-                            if (username !== "" && href !== "" && !isDeleted) {
-                                list.push({ username, timestamp });
-                            }
+                for (const entry of followingFiles) {
+                    try {
+                        const raw = await entry.async("string");
+                        if (raw.length > 5 * 1024 * 1024) {
+                            console.warn("Skipping oversized JSON file:", entry.name);
+                            continue;
                         }
-                    });
-                    return list;
-                };
 
-                const followers = getList(followersData, 'relationships_followers').map(u => u.username);
-                const following = getList(followingData, 'relationships_following');
-                const pending = getList(pendingData, 'relationships_follow_requests_sent').map(u => u.username);
+                        const parsed = JSON.parse(raw);
+                        const users = extractUsernames(parsed);
+                        users.forEach(user => {
+                            if (!followingMap.has(user.username)) {
+                                followingMap.set(user.username, user);
+                            }
+                        });
+                    } catch (err) {
+                        console.warn("Failed to parse following file:", entry.name, err);
+                    }
+                }
+
+                const followers = Array.from(followerMap.values()).map(user => user.username);
+                const following = Array.from(followingMap.values());
+
+                console.log("Followers found:", followers.length);
+                console.log("Following found:", following.length);
+
+                if (followers.length === 0 && following.length === 0) {
+                    throw new Error("We could not find your followers and following data in this zip file. Please make sure you downloaded the correct file.");
+                }
 
                 const followerSet = new Set(followers);
-                const pendingSet = new Set(pending);
-                
+
                 globalTraitors = following
-                    .filter(user => !followerSet.has(user.username) && !pendingSet.has(user.username))
+                    .filter(user => !followerSet.has(user.username))
                     .map(user => ({
                         username: user.username,
                         timestamp: user.timestamp * 1000
@@ -1515,7 +1582,7 @@
 
                 applyFilters(); // Apply initial sorting and rendering
 
-                displayResults(followers.length, following.length - pending.length);
+                displayResults(followers.length, following.length);
 
             } catch (err) {
                 alert("Error parsing file: " + err.message);
