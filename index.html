@@ -792,7 +792,8 @@
             display: none;
             background-color: var(--surface);
             min-height: 100vh;
-            padding-bottom: 8rem;
+            padding-top: 2rem;
+            padding-bottom: 4rem;
         }
 
         .faq-container {
@@ -865,8 +866,12 @@
             color: var(--primary);
             text-decoration: none;
             font-weight: 600;
-            margin-bottom: 2rem;
+            margin-bottom: 12px;
             cursor: pointer;
+        }
+
+        #faq-page .section-title {
+            margin-top: 0;
         }
 
         .nav-link {
@@ -1136,11 +1141,20 @@
         <div class="container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
             <a href="#" class="logo">UnfollowerSpy</a>
             <div style="display: flex; align-items: center;">
-                <div class="pill-badge">100% Private &middot; No Login</div>
-                <div class="nav-links">
-                    <a href="blog.html" class="nav-link">Blog</a>
-                    <a class="nav-link" onclick="showFAQ()">FAQ</a>
-                    <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
+                <div id="homeDesktopNav" style="display: flex; align-items: center;">
+                    <div class="pill-badge">100% Private &middot; No Login</div>
+                    <div class="nav-links">
+                        <a href="blog.html" class="nav-link">Blog</a>
+                        <a class="nav-link" onclick="showFAQ()">FAQ</a>
+                        <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
+                    </div>
+                </div>
+                <div id="faqDesktopNav" hidden>
+                    <div class="nav-links">
+                        <a class="nav-link" onclick="hideFAQ()">Home</a>
+                        <a href="blog.html" class="nav-link">Blog</a>
+                        <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
+                    </div>
                 </div>
                 <button class="hamburger" id="hamburgerMenuButton" aria-label="Open menu" aria-expanded="false" aria-controls="navDropdownMenu" type="button">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1169,11 +1183,11 @@
     <!-- FAQ PAGE (Hidden by default) -->
     <section id="faq-page">
         <div class="faq-container">
-            <div class="back-link" onclick="hideFAQ()">
+            <div class="back-link" onclick="hideFAQ()" style="margin-bottom: 8px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 Back to Audit
             </div>
-            <h2 class="section-title">Frequently Asked Questions</h2>
+            <h2 class="section-title" style="margin-top: 0; margin-bottom: 24px;">Frequently Asked Questions</h2>
             
             <div class="faq-list">
                 <div class="faq-item">
@@ -1458,6 +1472,8 @@
         const mainHow = document.getElementById('guide-section');
         const mainResults = document.getElementById('results');
         const hamburgerMenuButton = document.getElementById('hamburgerMenuButton');
+        const homeDesktopNav = document.getElementById('homeDesktopNav');
+        const faqDesktopNav = document.getElementById('faqDesktopNav');
         const homeNavDropdownMenu = document.getElementById('homeNavDropdownMenu');
         const faqNavDropdownMenu = document.getElementById('faqNavDropdownMenu');
 
@@ -1466,7 +1482,10 @@
         }
 
         function syncActiveNavDropdown() {
+            const isFAQView = faqPage && faqPage.style.display === 'block';
             const activeDropdown = getActiveNavDropdown();
+            if (homeDesktopNav) homeDesktopNav.hidden = isFAQView;
+            if (faqDesktopNav) faqDesktopNav.hidden = !isFAQView;
             [homeNavDropdownMenu, faqNavDropdownMenu].forEach(menu => {
                 if (!menu) return;
                 const isActive = menu === activeDropdown;
@@ -1518,27 +1537,41 @@
         });
 
         function showFAQ() {
-            closeNavDropdown();
-            if (mainHero) mainHero.style.display = 'none';
-            if (mainHow) mainHow.style.display = 'none';
-            if (mainResults) mainResults.style.display = 'none';
-            if (faqPage) faqPage.style.display = 'block';
-            syncActiveNavDropdown();
-            window.scrollTo(0, 0);
+          // Hide main content sections
+          document.querySelectorAll('.hero, #guide-section, #results').forEach(el => { el.style.display = 'none'; });
+          // Show FAQ section
+          const faqPage = document.getElementById('faq-page');
+          faqPage.removeAttribute('hidden');
+          faqPage.style.display = 'block';
+          // Swap desktop nav
+          document.getElementById('homeDesktopNav').style.display = 'none';
+          const faqDesktopNav = document.getElementById('faqDesktopNav');
+          faqDesktopNav.removeAttribute('hidden');
+          faqDesktopNav.style.display = 'flex';
+          // Swap mobile dropdown
+          document.getElementById('homeNavDropdownMenu').setAttribute('hidden', '');
+          document.getElementById('homeNavDropdownMenu').style.display = 'none';
+          const faqDropdown = document.getElementById('faqNavDropdownMenu');
+          faqDropdown.removeAttribute('hidden');
+          window.scrollTo(0, 0);
         }
 
         function hideFAQ() {
-            if (faqPage) faqPage.style.display = 'none';
-            // Determine which view to restore
-            const saved = sessionStorage.getItem('unfollowspy_results');
-            if (saved || (mainResults && mainResults.style.display === 'block')) {
-                if (mainResults) mainResults.style.display = 'block';
-            } else {
-                if (mainHero) mainHero.style.display = 'block';
-                if (mainHow) mainHow.style.display = 'block';
-            }
-            syncActiveNavDropdown();
-            window.scrollTo(0, 0);
+          // Hide FAQ section
+          const faqPage = document.getElementById('faq-page');
+          faqPage.setAttribute('hidden', '');
+          faqPage.style.display = 'none';
+          // Restore main content sections
+          document.querySelectorAll('.hero, #guide-section, #results').forEach(el => { el.style.display = ''; });
+          // Swap desktop nav back
+          document.getElementById('faqDesktopNav').setAttribute('hidden', '');
+          document.getElementById('faqDesktopNav').style.display = 'none';
+          document.getElementById('homeDesktopNav').style.display = 'flex';
+          // Swap mobile dropdown back
+          document.getElementById('faqNavDropdownMenu').setAttribute('hidden', '');
+          document.getElementById('faqNavDropdownMenu').style.display = 'none';
+          document.getElementById('homeNavDropdownMenu').removeAttribute('hidden');
+          window.scrollTo(0, 0);
         }
 
         // Accordion logic
