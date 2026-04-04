@@ -71,6 +71,20 @@
             text-decoration: none;
         }
 
+        .back-arrow-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-right: 0.9rem;
+            color: #4a40e0;
+            text-decoration: none;
+            background: transparent;
+            border: 0;
+            flex-shrink: 0;
+        }
+
         .pill-badge {
             background-color: var(--secondary);
             color: white;
@@ -92,6 +106,65 @@
 
         .nav-link:hover {
             color: var(--primary);
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            margin-left: 1.5rem;
+        }
+
+        .nav-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            border-top: 1px solid rgba(171, 173, 174, 0.2);
+            box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            animation: navDropdownFade 0.2s ease;
+        }
+
+        .nav-dropdown-link {
+            display: block;
+            width: 100%;
+            padding: 18px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c2f30;
+            text-decoration: none;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+        }
+
+        .nav-dropdown-link:hover {
+            color: var(--primary);
+        }
+
+        @keyframes navDropdownFade {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         .hero {
@@ -242,6 +315,14 @@
                 display: none;
             }
 
+            .hamburger {
+                display: flex;
+            }
+
+            .logo {
+                font-size: 1rem;
+            }
+
             .hero {
                 padding-top: 3rem;
             }
@@ -271,11 +352,29 @@
 <body>
     <nav>
         <div class="container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
-            <a href="index.html" class="logo">UnfollowerSpy</a>
             <div style="display: flex; align-items: center;">
-                <div class="pill-badge">100% Private &middot; No Login</div>
-                <a href="index.html" class="nav-link">Back to Audit</a>
+                <a href="index.html" class="back-arrow-button" aria-label="Back to home">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M14 6L8 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </a>
+                <a href="index.html" class="logo">UnfollowerSpy</a>
             </div>
+            <div style="display: flex; align-items: center;">
+                <button class="hamburger" id="hamburgerMenuButton" aria-label="Open menu" aria-expanded="false" aria-controls="navDropdownMenu" type="button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect x="2" y="5" width="20" height="2" rx="1" fill="#1a1a2e"/>
+                        <rect x="2" y="11" width="20" height="2" rx="1" fill="#1a1a2e"/>
+                        <rect x="2" y="17" width="20" height="2" rx="1" fill="#1a1a2e"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="nav-dropdown" id="navDropdownMenu">
+            <a href="index.html" class="nav-dropdown-link">Home</a>
+            <a href="blog.html" class="nav-dropdown-link">Blog</a>
+            <a class="nav-dropdown-link" onclick="goToFAQ()">FAQ</a>
+            <a href="privacy-policy.html" class="nav-dropdown-link">Privacy Policy</a>
         </div>
     </nav>
 
@@ -401,5 +500,50 @@
             </div>
         </div>
     </section>
+    <script>
+        const hamburgerMenuButton = document.getElementById('hamburgerMenuButton');
+        const navDropdownMenu = document.getElementById('navDropdownMenu');
+
+        function closeNavDropdown() {
+            if (navDropdownMenu) navDropdownMenu.classList.remove('open');
+            if (hamburgerMenuButton) hamburgerMenuButton.setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleNavDropdown() {
+            if (!navDropdownMenu || !hamburgerMenuButton) return;
+            const isOpen = navDropdownMenu.classList.toggle('open');
+            hamburgerMenuButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        function goToFAQ() {
+            closeNavDropdown();
+            sessionStorage.setItem('unfollowspy_open_faq', 'true');
+            window.location.href = 'index.html';
+        }
+
+        if (hamburgerMenuButton) {
+            hamburgerMenuButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                toggleNavDropdown();
+            });
+        }
+
+        if (navDropdownMenu) {
+            navDropdownMenu.querySelectorAll('.nav-dropdown-link').forEach(link => {
+                link.addEventListener('click', closeNavDropdown);
+            });
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!navDropdownMenu || !hamburgerMenuButton) return;
+            if (!navDropdownMenu.contains(event.target) && !hamburgerMenuButton.contains(event.target)) {
+                closeNavDropdown();
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            closeNavDropdown();
+        });
+    </script>
 </body>
 </html>

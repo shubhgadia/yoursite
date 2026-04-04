@@ -568,10 +568,11 @@
             .logo {
                 font-size: 1rem; /* 16px */
             }
-            .nav-links {
-                display: none;
+            nav .nav-links,
+            nav .pill-badge {
+                display: none !important;
             }
-            .hamburger-button {
+            nav .hamburger {
                 display: inline-flex;
             }
             section {
@@ -796,8 +797,12 @@
 
         .faq-container {
             max-width: 800px;
-            margin: 4rem auto 0;
+            margin: 0 auto 0;
             padding: 0 2rem;
+        }
+
+        .faq-list {
+            margin-bottom: 40px;
         }
 
         .faq-item {
@@ -882,22 +887,17 @@
             align-items: center;
         }
 
-        .hamburger-button {
+        .hamburger {
             display: none;
-            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 5px;
             padding: 0;
             margin-left: 1.5rem;
-            background: transparent;
-            border: 0;
+            background: none;
+            border: none;
+            outline: none;
             cursor: pointer;
-        }
-
-        .hamburger-line {
-            width: 20px;
-            height: 2px;
-            background: var(--on-surface);
         }
 
         .nav-dropdown {
@@ -908,6 +908,7 @@
             background: #ffffff;
             border-top: 1px solid rgba(171, 173, 174, 0.2);
             box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+            z-index: 1000;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -924,10 +925,10 @@
         .nav-dropdown-link {
             display: block;
             width: 100%;
-            padding: 20px 24px;
+            padding: 18px 24px;
             font-size: 16px;
             font-weight: 600;
-            color: var(--on-surface);
+            color: #2c2f30;
             text-decoration: none;
             background: #ffffff;
             border-bottom: 1px solid #e5e7eb;
@@ -1138,21 +1139,26 @@
                 <div class="pill-badge">100% Private &middot; No Login</div>
                 <div class="nav-links">
                     <a href="blog.html" class="nav-link">Blog</a>
-                    <a href="#guide-section" class="nav-link">How it works</a>
                     <a class="nav-link" onclick="showFAQ()">FAQ</a>
                     <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
                 </div>
-                <button class="hamburger-button" id="hamburgerMenuButton" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navDropdownMenu" type="button">
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
+                <button class="hamburger" id="hamburgerMenuButton" aria-label="Open menu" aria-expanded="false" aria-controls="navDropdownMenu" type="button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect x="2" y="5" width="20" height="2" rx="1" fill="#1a1a2e"/>
+                        <rect x="2" y="11" width="20" height="2" rx="1" fill="#1a1a2e"/>
+                        <rect x="2" y="17" width="20" height="2" rx="1" fill="#1a1a2e"/>
+                    </svg>
                 </button>
             </div>
         </div>
-        <div class="nav-dropdown" id="navDropdownMenu">
+        <div class="nav-dropdown" id="homeNavDropdownMenu">
             <a href="blog.html" class="nav-dropdown-link">Blog</a>
-            <a href="#guide-section" class="nav-dropdown-link">How it works</a>
             <a class="nav-dropdown-link" onclick="showFAQ()">FAQ</a>
+            <a href="privacy-policy.html" class="nav-dropdown-link">Privacy Policy</a>
+        </div>
+        <div class="nav-dropdown" id="faqNavDropdownMenu" hidden>
+            <a class="nav-dropdown-link" onclick="hideFAQ()">Home</a>
+            <a href="blog.html" class="nav-dropdown-link">Blog</a>
             <a href="privacy-policy.html" class="nav-dropdown-link">Privacy Policy</a>
         </div>
         <div class="scroll-progress-container">
@@ -1452,16 +1458,34 @@
         const mainHow = document.getElementById('guide-section');
         const mainResults = document.getElementById('results');
         const hamburgerMenuButton = document.getElementById('hamburgerMenuButton');
-        const navDropdownMenu = document.getElementById('navDropdownMenu');
+        const homeNavDropdownMenu = document.getElementById('homeNavDropdownMenu');
+        const faqNavDropdownMenu = document.getElementById('faqNavDropdownMenu');
+
+        function getActiveNavDropdown() {
+            return faqPage && faqPage.style.display === 'block' ? faqNavDropdownMenu : homeNavDropdownMenu;
+        }
+
+        function syncActiveNavDropdown() {
+            const activeDropdown = getActiveNavDropdown();
+            [homeNavDropdownMenu, faqNavDropdownMenu].forEach(menu => {
+                if (!menu) return;
+                const isActive = menu === activeDropdown;
+                menu.hidden = !isActive;
+                if (!isActive) menu.classList.remove('open');
+            });
+        }
 
         function closeNavDropdown() {
-            if (navDropdownMenu) navDropdownMenu.classList.remove('open');
+            [homeNavDropdownMenu, faqNavDropdownMenu].forEach(menu => {
+                if (menu) menu.classList.remove('open');
+            });
             if (hamburgerMenuButton) hamburgerMenuButton.setAttribute('aria-expanded', 'false');
         }
 
         function toggleNavDropdown() {
-            if (!navDropdownMenu || !hamburgerMenuButton) return;
-            const isOpen = navDropdownMenu.classList.toggle('open');
+            const activeDropdown = getActiveNavDropdown();
+            if (!activeDropdown || !hamburgerMenuButton) return;
+            const isOpen = activeDropdown.classList.toggle('open');
             hamburgerMenuButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         }
 
@@ -1472,15 +1496,17 @@
             });
         }
 
-        if (navDropdownMenu) {
-            navDropdownMenu.querySelectorAll('.nav-dropdown-link').forEach(link => {
+        [homeNavDropdownMenu, faqNavDropdownMenu].forEach(menu => {
+            if (!menu) return;
+            menu.querySelectorAll('.nav-dropdown-link').forEach(link => {
                 link.addEventListener('click', closeNavDropdown);
             });
-        }
+        });
 
         document.addEventListener('click', function(event) {
-            if (!navDropdownMenu || !hamburgerMenuButton) return;
-            if (!navDropdownMenu.contains(event.target) && !hamburgerMenuButton.contains(event.target)) {
+            const activeDropdown = getActiveNavDropdown();
+            if (!activeDropdown || !hamburgerMenuButton) return;
+            if (!activeDropdown.contains(event.target) && !hamburgerMenuButton.contains(event.target)) {
                 closeNavDropdown();
             }
         });
@@ -1497,6 +1523,7 @@
             if (mainHow) mainHow.style.display = 'none';
             if (mainResults) mainResults.style.display = 'none';
             if (faqPage) faqPage.style.display = 'block';
+            syncActiveNavDropdown();
             window.scrollTo(0, 0);
         }
 
@@ -1510,6 +1537,7 @@
                 if (mainHero) mainHero.style.display = 'block';
                 if (mainHow) mainHow.style.display = 'block';
             }
+            syncActiveNavDropdown();
             window.scrollTo(0, 0);
         }
 
@@ -1575,6 +1603,14 @@
 
         // Load saved results on startup
         window.addEventListener('DOMContentLoaded', () => {
+            syncActiveNavDropdown();
+            const openFAQ = sessionStorage.getItem('unfollowspy_open_faq');
+            if (openFAQ === 'true') {
+                sessionStorage.removeItem('unfollowspy_open_faq');
+                showFAQ();
+                return;
+            }
+
             const saved = sessionStorage.getItem('unfollowspy_results');
             if (saved) {
                 const data = JSON.parse(saved);
