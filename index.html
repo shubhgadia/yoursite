@@ -568,6 +568,12 @@
             .logo {
                 font-size: 1rem; /* 16px */
             }
+            .nav-links {
+                display: none;
+            }
+            .hamburger-button {
+                display: inline-flex;
+            }
             section {
                 padding: 4rem 0;
             }
@@ -871,6 +877,76 @@
             color: var(--primary);
         }
 
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .hamburger-button {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+            padding: 0;
+            margin-left: 1.5rem;
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+        }
+
+        .hamburger-line {
+            width: 20px;
+            height: 2px;
+            background: var(--on-surface);
+        }
+
+        .nav-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            border-top: 1px solid rgba(171, 173, 174, 0.2);
+            box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            animation: navDropdownFade 0.2s ease;
+        }
+
+        .nav-dropdown-link {
+            display: block;
+            width: 100%;
+            padding: 20px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--on-surface);
+            text-decoration: none;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+        }
+
+        .nav-dropdown-link:hover {
+            color: var(--primary);
+        }
+
+        @keyframes navDropdownFade {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
         /* --- GUIDE SECTION --- */
         html {
             scroll-behavior: smooth;
@@ -1060,8 +1136,24 @@
             <a href="#" class="logo">UnfollowerSpy</a>
             <div style="display: flex; align-items: center;">
                 <div class="pill-badge">100% Private &middot; No Login</div>
-                <a class="nav-link" onclick="showFAQ()">FAQ</a>
+                <div class="nav-links">
+                    <a href="blog.html" class="nav-link">Blog</a>
+                    <a href="#guide-section" class="nav-link">How it works</a>
+                    <a class="nav-link" onclick="showFAQ()">FAQ</a>
+                    <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
+                </div>
+                <button class="hamburger-button" id="hamburgerMenuButton" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navDropdownMenu" type="button">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
             </div>
+        </div>
+        <div class="nav-dropdown" id="navDropdownMenu">
+            <a href="blog.html" class="nav-dropdown-link">Blog</a>
+            <a href="#guide-section" class="nav-dropdown-link">How it works</a>
+            <a class="nav-dropdown-link" onclick="showFAQ()">FAQ</a>
+            <a href="privacy-policy.html" class="nav-dropdown-link">Privacy Policy</a>
         </div>
         <div class="scroll-progress-container">
             <div class="scroll-progress-bar" id="scrollProgress"></div>
@@ -1359,8 +1451,48 @@
         const mainHero = document.querySelector('.hero');
         const mainHow = document.getElementById('guide-section');
         const mainResults = document.getElementById('results');
+        const hamburgerMenuButton = document.getElementById('hamburgerMenuButton');
+        const navDropdownMenu = document.getElementById('navDropdownMenu');
+
+        function closeNavDropdown() {
+            if (navDropdownMenu) navDropdownMenu.classList.remove('open');
+            if (hamburgerMenuButton) hamburgerMenuButton.setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleNavDropdown() {
+            if (!navDropdownMenu || !hamburgerMenuButton) return;
+            const isOpen = navDropdownMenu.classList.toggle('open');
+            hamburgerMenuButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        if (hamburgerMenuButton) {
+            hamburgerMenuButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                toggleNavDropdown();
+            });
+        }
+
+        if (navDropdownMenu) {
+            navDropdownMenu.querySelectorAll('.nav-dropdown-link').forEach(link => {
+                link.addEventListener('click', closeNavDropdown);
+            });
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!navDropdownMenu || !hamburgerMenuButton) return;
+            if (!navDropdownMenu.contains(event.target) && !hamburgerMenuButton.contains(event.target)) {
+                closeNavDropdown();
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeNavDropdown();
+            }
+        });
 
         function showFAQ() {
+            closeNavDropdown();
             if (mainHero) mainHero.style.display = 'none';
             if (mainHow) mainHow.style.display = 'none';
             if (mainResults) mainResults.style.display = 'none';
