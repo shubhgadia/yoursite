@@ -1988,6 +1988,13 @@
             applyFilters();
             window.scrollTo(0, 0);
         }
+
+        window.addEventListener('DOMContentLoaded', function() {
+          if (window.location.hash === '#faq') {
+            showFAQ();
+            history.replaceState(null, null, window.location.pathname);
+          }
+        });
     </script>
 </body>
 </html>
