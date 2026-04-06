@@ -18,6 +18,7 @@
             --surface-lowest: #ffffff;
             --surface-variant: #dadddf;
             --on-surface: #2c2f30;
+            --surface-high: #e3e5e7;
             --shadow-soft: 0 12px 40px rgba(44, 47, 48, 0.06);
         }
 
@@ -47,6 +48,7 @@
             z-index: 1000;
             background: rgba(245, 246, 247, 0.85);
             backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--surface-high);
             padding: 1.25rem 2rem;
             display: flex;
             justify-content: space-between;
@@ -65,6 +67,20 @@
             color: var(--primary);
             font-family: 'Manrope', sans-serif;
             text-decoration: none;
+        }
+
+        .back-arrow-button {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-right: 0.9rem;
+            color: #4a40e0;
+            text-decoration: none;
+            background: transparent;
+            border: 0;
+            flex-shrink: 0;
         }
 
         .pill-badge {
@@ -154,7 +170,7 @@
         }
 
         .hero {
-            padding: 4rem 0 3rem;
+            padding: 2rem 0 3rem;
         }
 
         .hero-grid {
@@ -291,6 +307,10 @@
                 display: none;
             }
 
+            .back-arrow-button {
+                display: inline-flex;
+            }
+
             .desktop-nav-links {
                 display: none;
             }
@@ -318,7 +338,14 @@
 <body>
     <nav>
         <div class="container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
-            <a href="index.html" class="logo">UnfollowerSpy</a>
+            <div style="display: flex; align-items: center;">
+                <a href="index.html" class="back-arrow-button" aria-label="Back to home">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M14 6L8 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </a>
+                <a href="index.html" class="logo">UnfollowerSpy</a>
+            </div>
             <div style="display: flex; align-items: center;">
                 <div class="desktop-nav-links">
                     <div class="nav-links">

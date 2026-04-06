@@ -65,6 +65,7 @@
             z-index: 1000;
             background: rgba(245, 246, 247, 0.85);
             backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--surface-high);
             padding: 1.25rem 2rem;
             display: flex;
             justify-content: space-between;
@@ -391,12 +392,12 @@
                         <path d="M14 6L8 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </a>
-                <a href="#" class="logo">UnfollowerSpy</a>
+                <a href="index.html" class="logo">UnfollowerSpy</a>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="nav-links">
                     <a href="index.html" class="nav-link">Home</a>
-                    <a href="index.html" class="nav-link">FAQ</a>
+                    <a class="nav-link" onclick="showFAQ()">FAQ</a>
                     <a href="about.html" class="nav-link">About Us</a>
                     <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
                 </div>
@@ -411,7 +412,6 @@
         </div>
         <div class="nav-dropdown" id="navDropdownMenu">
             <a href="index.html" class="nav-dropdown-link">Home</a>
-            <a href="#guide-section" class="nav-dropdown-link">How it works</a>
             <a class="nav-dropdown-link" onclick="showFAQ()">FAQ</a>
             <a href="about.html" class="nav-dropdown-link">About Us</a>
             <a href="privacy-policy.html" class="nav-dropdown-link">Privacy Policy</a>
@@ -534,8 +534,8 @@
 
         function showFAQ() {
             closeNavDropdown();
-            const faqSection = document.getElementById('faq-section');
-            if (faqSection) faqSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            sessionStorage.setItem('unfollowspy_open_faq', 'true');
+            window.location.href = 'index.html';
         }
 
         if (hamburgerMenuButton) {

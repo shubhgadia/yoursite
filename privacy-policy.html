@@ -18,6 +18,7 @@
             --surface-lowest: #ffffff;
             --surface-variant: #dadddf;
             --on-surface: #2c2f30;
+            --surface-high: #e3e5e7;
             --shadow-soft: 0 12px 40px rgba(44, 47, 48, 0.06);
         }
 
@@ -51,6 +52,7 @@
             z-index: 1000;
             background: rgba(245, 246, 247, 0.85);
             backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--surface-high);
             padding: 1.25rem 2rem;
             display: flex;
             justify-content: space-between;
@@ -72,7 +74,7 @@
         }
 
         .back-arrow-button {
-            display: inline-flex;
+            display: none;
             align-items: center;
             justify-content: center;
             width: 24px;
@@ -330,6 +332,10 @@
 
             .logo {
                 font-size: 1rem;
+            }
+
+            .back-arrow-button {
+                display: inline-flex;
             }
 
             .hero {

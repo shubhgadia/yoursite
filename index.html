@@ -62,6 +62,7 @@
             z-index: 1000;
             background: rgba(245, 246, 247, 0.85);
             backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--surface-high);
             padding: 1.25rem 2rem;
             display: flex;
             justify-content: space-between;
@@ -74,6 +75,20 @@
             color: var(--primary);
             font-family: 'Manrope', sans-serif;
             text-decoration: none;
+        }
+
+        .back-arrow-button {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-right: 0.9rem;
+            color: #4a40e0;
+            text-decoration: none;
+            background: transparent;
+            border: 0;
+            flex-shrink: 0;
         }
 
         .pill-badge {
@@ -870,6 +885,16 @@
             cursor: pointer;
         }
 
+        @media (max-width: 768px) {
+            .back-link {
+                display: none;
+            }
+
+            body.faq-visible .back-arrow-button {
+                display: inline-flex;
+            }
+        }
+
         #faq-page .section-title {
             margin-top: 0;
         }
@@ -1139,7 +1164,14 @@
     <!-- NAVIGATION -->
     <nav>
         <div class="container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
-            <a href="#" class="logo">UnfollowerSpy</a>
+            <div style="display: flex; align-items: center;">
+                <button class="back-arrow-button" onclick="hideFAQ()" aria-label="Back to home" type="button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M14 6L8 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+                <a href="#" class="logo" onclick="hideFAQ()">UnfollowerSpy</a>
+            </div>
             <div style="display: flex; align-items: center;">
                 <div id="homeDesktopNav" style="display: flex; align-items: center;">
                     <div class="pill-badge">100% Private &middot; No Login</div>
@@ -1547,6 +1579,7 @@
           const faqPage = document.getElementById('faq-page');
           faqPage.removeAttribute('hidden');
           faqPage.style.display = 'block';
+          document.body.classList.add('faq-visible');
           // Swap desktop nav
           document.getElementById('homeDesktopNav').style.display = 'none';
           const faqDesktopNav = document.getElementById('faqDesktopNav');
@@ -1565,6 +1598,7 @@
           const faqPage = document.getElementById('faq-page');
           faqPage.setAttribute('hidden', '');
           faqPage.style.display = 'none';
+          document.body.classList.remove('faq-visible');
           // Restore main content sections
           document.querySelectorAll('.hero, #guide-section, #results').forEach(el => { el.style.display = ''; });
           // Swap desktop nav back
