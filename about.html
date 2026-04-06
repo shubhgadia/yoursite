@@ -83,9 +83,69 @@
             text-decoration: none;
             margin-left: 1.5rem;
             font-size: 0.85rem;
+            cursor: pointer;
         }
 
         .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .desktop-nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .hamburger {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin-left: 1.5rem;
+            background: none;
+            border: none;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .nav-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            border-top: 1px solid rgba(171, 173, 174, 0.2);
+            box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .nav-dropdown-link {
+            display: block;
+            width: 100%;
+            padding: 18px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c2f30;
+            text-decoration: none;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+        }
+
+        .nav-dropdown-link:hover {
             color: var(--primary);
         }
 
@@ -231,6 +291,14 @@
                 display: none;
             }
 
+            .desktop-nav-links {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
             .hero-grid,
             .steps {
                 grid-template-columns: 1fr;
@@ -252,8 +320,28 @@
         <div class="container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
             <a href="index.html" class="logo">UnfollowerSpy</a>
             <div style="display: flex; align-items: center;">
-                <a href="index.html" class="nav-link">Back to Audit</a>
+                <div class="desktop-nav-links">
+                    <div class="nav-links">
+                        <a href="index.html" class="nav-link">Home</a>
+                        <a href="blog.html" class="nav-link">Blog</a>
+                        <a href="index.html" class="nav-link">FAQ</a>
+                        <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
+                    </div>
+                </div>
+                <button class="hamburger" id="hamburgerMenuButton" aria-label="Open menu" aria-expanded="false" aria-controls="navDropdownMenu" type="button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect x="2" y="5" width="20" height="2" rx="1" fill="#1a1a2e"/>
+                        <rect x="2" y="11" width="20" height="2" rx="1" fill="#1a1a2e"/>
+                        <rect x="2" y="17" width="20" height="2" rx="1" fill="#1a1a2e"/>
+                    </svg>
+                </button>
             </div>
+        </div>
+        <div class="nav-dropdown" id="navDropdownMenu">
+            <a href="index.html" class="nav-dropdown-link">Home</a>
+            <a href="blog.html" class="nav-dropdown-link">Blog</a>
+            <a href="index.html" class="nav-dropdown-link">FAQ</a>
+            <a href="privacy-policy.html" class="nav-dropdown-link">Privacy Policy</a>
         </div>
     </nav>
 
@@ -331,5 +419,46 @@
             </div>
         </div>
     </section>
+    <script>
+        const hamburgerMenuButton = document.getElementById('hamburgerMenuButton');
+        const navDropdownMenu = document.getElementById('navDropdownMenu');
+
+        function closeNavDropdown() {
+            if (navDropdownMenu) navDropdownMenu.classList.remove('open');
+            if (hamburgerMenuButton) hamburgerMenuButton.setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleNavDropdown() {
+            if (!navDropdownMenu || !hamburgerMenuButton) return;
+            const isOpen = navDropdownMenu.classList.toggle('open');
+            hamburgerMenuButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        if (hamburgerMenuButton) {
+            hamburgerMenuButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                toggleNavDropdown();
+            });
+        }
+
+        if (navDropdownMenu) {
+            navDropdownMenu.querySelectorAll('.nav-dropdown-link').forEach(link => {
+                link.addEventListener('click', closeNavDropdown);
+            });
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!navDropdownMenu || !hamburgerMenuButton) return;
+            if (!navDropdownMenu.contains(event.target) && !hamburgerMenuButton.contains(event.target)) {
+                closeNavDropdown();
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeNavDropdown();
+            }
+        });
+    </script>
 </body>
 </html>
