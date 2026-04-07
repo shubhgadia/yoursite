@@ -368,18 +368,18 @@
     <nav>
         <div class="container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center;">
-                <a href="home.html" class="back-arrow-button" aria-label="Back to home">
+                <a href="index.html" class="back-arrow-button" aria-label="Back to home">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M14 6L8 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </a>
-                <a href="home.html" class="logo">UnfollowerSpy</a>
+                <a href="index.html" class="logo">UnfollowerSpy</a>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="desktop-nav-links">
-                    <a href="home.html" class="nav-link">Home</a>
+                    <a href="index.html" class="nav-link">Home</a>
                     <a href="blog.html" class="nav-link">Blog</a>
-                    <a href="home.html#faq" class="nav-link">FAQ</a>
+                    <a href="index.html#faq" class="nav-link">FAQ</a>
                     <a href="about.html" class="nav-link">About Us</a>
                 </div>
                 <button class="hamburger" id="hamburgerMenuButton" aria-label="Open menu" aria-expanded="false" aria-controls="navDropdownMenu" type="button">
@@ -392,9 +392,9 @@
             </div>
         </div>
         <div class="nav-dropdown" id="navDropdownMenu">
-            <a href="home.html" class="nav-dropdown-link">Home</a>
+            <a href="index.html" class="nav-dropdown-link">Home</a>
             <a href="blog.html" class="nav-dropdown-link">Blog</a>
-            <a href="home.html#faq" class="nav-dropdown-link">FAQ</a>
+            <a href="index.html#faq" class="nav-dropdown-link">FAQ</a>
             <a href="about.html" class="nav-dropdown-link">About Us</a>
         </div>
     </nav>
@@ -516,7 +516,7 @@
         <div class="container" style="text-align: center; color: #6b7172;">
             <p>&copy; 2026 UnfollowerSpy. Privacy First. Local Processing only.</p>
             <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 2rem;">
-                <a href="home.html" class="nav-link" style="margin: 0;">Home</a>
+                <a href="index.html" class="nav-link" style="margin: 0;">Home</a>
                 <a href="privacy-policy.html" class="nav-link" style="margin: 0;">Privacy Policy</a>
             </div>
         </div>
@@ -539,7 +539,7 @@
         function goToFAQ() {
             closeNavDropdown();
             sessionStorage.setItem('unfollowspy_open_faq', 'true');
-            window.location.href = 'home.html';
+            window.location.href = 'index.html';
         }
 
         if (hamburgerMenuButton) {
