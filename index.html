@@ -781,28 +781,6 @@
             display: block;
         }
 
-        /* --- ADSENSE PLACEHOLDERS --- */
-        .adsense-placeholder {
-            height: 120px;
-            background-color: #f5f6f7;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            color: #6b7172;
-            margin: 24px 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            opacity: 0.8;
-        }
-
-        @media (max-width: 768px) {
-            .adsense-placeholder {
-                margin: 24px 1.25rem;
-            }
-        }
-
         /* --- FAQ SECTION --- */
         #faq-page {
             display: none;
@@ -1934,11 +1912,8 @@
                 return;
             }
 
-            // Calculate dynamic interval: 15% of total, minimum 20, maximum 40
-            const total = results.length;
-            let interval = Math.floor(total * 0.15);
-            if (interval < 20) interval = 20;
-            if (interval > 40) interval = 40;
+            // Post-approval ad logic to restore: insert real AdSense units every
+            // clamp(floor(total results * 0.15), 20, 40) rows and after the final row.
 
             results.forEach((user, index) => {
                 const item = document.createElement('div');
@@ -1956,19 +1931,6 @@
                     </div>
                 `;
                 listEl.appendChild(item);
-
-                // Insert ad placeholder after every interval and at the very end
-                const currentPos = index + 1;
-                if (currentPos % interval === 0 || currentPos === total) {
-                    const comment = document.createComment(" replace this div with your Google AdSense in-article ad unit code ");
-                    const adDiv = document.createElement('div');
-                    adDiv.className = 'adsense-placeholder';
-                    adDiv.innerText = 'Advertisement';
-                    
-                    listEl.appendChild(comment);
-                    listEl.appendChild(adDiv);
-                }
-
             });
         }
 
