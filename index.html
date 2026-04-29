@@ -42,6 +42,12 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        :focus-visible {
+            outline: 3px solid rgba(74, 64, 224, 0.42);
+            outline-offset: 4px;
+            border-radius: 0.35rem;
+        }
+
         body {
             background-color: var(--surface);
             color: var(--on-surface);
@@ -197,8 +203,8 @@
         .hero-right svg {
             width: 100%;
             height: auto;
-            max-width: none;
-            margin: 0 0 0 4rem;
+            max-width: 720px;
+            margin: 0 auto;
             display: block;
         }
 
@@ -1155,23 +1161,27 @@
                         <path d="M14 6L8 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                 </button>
-                <a href="#" class="logo" onclick="hideFAQ()">UnfollowerSpy</a>
+                <a href="index.html" class="logo" onclick="hideFAQ(event)">UnfollowerSpy</a>
             </div>
             <div style="display: flex; align-items: center;">
                 <div id="homeDesktopNav" style="display: flex; align-items: center;">
                     <div class="pill-badge">100% Private &middot; No Login</div>
                     <div class="nav-links">
+                        <a href="index.html" class="nav-link">Home</a>
                         <a href="blog.html" class="nav-link">Blog</a>
-                        <a class="nav-link" onclick="showFAQ()">FAQ</a>
+                        <a href="#faq" class="nav-link" onclick="showFAQ(event)">FAQ</a>
                         <a href="about.html" class="nav-link">About Us</a>
+                        <a href="contact.html" class="nav-link">Contact</a>
                         <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
                     </div>
                 </div>
                 <div id="faqDesktopNav" hidden>
                     <div class="nav-links">
-                        <a class="nav-link" onclick="hideFAQ()">Home</a>
+                        <a href="index.html" class="nav-link" onclick="hideFAQ(event)">Home</a>
                         <a href="blog.html" class="nav-link">Blog</a>
+                        <a href="#faq" class="nav-link" onclick="showFAQ(event)">FAQ</a>
                         <a href="about.html" class="nav-link">About Us</a>
+                        <a href="contact.html" class="nav-link">Contact</a>
                         <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
                     </div>
                 </div>
@@ -1185,15 +1195,19 @@
             </div>
         </div>
         <div class="nav-dropdown" id="homeNavDropdownMenu">
+            <a href="index.html" class="nav-dropdown-link">Home</a>
             <a href="blog.html" class="nav-dropdown-link">Blog</a>
-            <a class="nav-dropdown-link" onclick="showFAQ()">FAQ</a>
+            <a href="#faq" class="nav-dropdown-link" onclick="showFAQ(event)">FAQ</a>
             <a href="about.html" class="nav-dropdown-link">About Us</a>
+            <a href="contact.html" class="nav-dropdown-link">Contact</a>
             <a href="privacy-policy.html" class="nav-dropdown-link">Privacy Policy</a>
         </div>
         <div class="nav-dropdown" id="faqNavDropdownMenu" hidden>
-            <a class="nav-dropdown-link" onclick="hideFAQ()">Home</a>
+            <a href="index.html" class="nav-dropdown-link" onclick="hideFAQ(event)">Home</a>
             <a href="blog.html" class="nav-dropdown-link">Blog</a>
+            <a href="#faq" class="nav-dropdown-link" onclick="showFAQ(event)">FAQ</a>
             <a href="about.html" class="nav-dropdown-link">About Us</a>
+            <a href="contact.html" class="nav-dropdown-link">Contact</a>
             <a href="privacy-policy.html" class="nav-dropdown-link">Privacy Policy</a>
         </div>
         <div class="scroll-progress-container">
@@ -1204,10 +1218,10 @@
     <!-- FAQ PAGE (Hidden by default) -->
     <section id="faq-page">
         <div class="faq-container">
-            <div class="back-link" onclick="hideFAQ()" style="margin-bottom: 8px;">
+            <a href="index.html" class="back-link" onclick="hideFAQ(event)" style="margin-bottom: 8px; text-decoration: none;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 Back to Audit
-            </div>
+            </a>
             <h2 class="section-title" style="margin-top: 0; margin-bottom: 24px;">Frequently Asked Questions</h2>
             
             <div class="faq-list">
@@ -1264,7 +1278,7 @@
         <div class="container asymmetric-grid">
             <div class="hero-left">
                 <span class="hero-label">Instagram Audit Tool</span>
-                <h1 class="hero-title">Discover who isn't following you back.</h1>
+                <h1 class="hero-title">See who doesn't follow you back on Instagram.</h1>
                 <p class="hero-sub">Upload your Instagram data file. We'll handle the rest &mdash; privately, instantly, for free.</p>
                 <div class="trust-badges">
                     <span class="trust-badge">🔒 No login required</span>
@@ -1470,12 +1484,14 @@
     <!-- FOOTER -->
     <section style="padding: 4rem 0; border-top: 1px solid var(--surface-variant); margin-top: 0;">
         <div class="container" style="text-align: center; color: #6b7172;">
-            <p>&copy; 2026 UnfollowerSpy. Privacy First. Local Processing only.</p>
-            <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 2rem;">
-                <a class="nav-link" style="margin: 0;" onclick="showFAQ()">FAQ</a>
+            <p style="font-size: 0.85rem; font-weight: 500;">&copy; 2026 UnfollowerSpy. Privacy First. Local Processing only.</p>
+            <div style="margin-top: 1rem; display: flex; justify-content: center; align-items: center; column-gap: 1.5rem; row-gap: 0.75rem; flex-wrap: wrap;">
+                <a href="index.html" class="nav-link" style="margin: 0;">Home</a>
+                <a href="blog.html" class="nav-link" style="margin: 0;">Blog</a>
+                <a href="#faq" class="nav-link" style="margin: 0;" onclick="showFAQ(event)">FAQ</a>
                 <a href="about.html" class="nav-link" style="margin: 0;">About Us</a>
-                <a href="privacy-policy.html" class="nav-link" style="margin: 0;">Privacy Policy</a>
                 <a href="contact.html" class="nav-link" style="margin: 0;">Contact</a>
+                <a href="privacy-policy.html" class="nav-link" style="margin: 0;">Privacy Policy</a>
             </div>
         </div>
     </section>
@@ -1557,7 +1573,8 @@
             }
         });
 
-        function showFAQ() {
+        function showFAQ(event) {
+          if (event) event.preventDefault();
           // Hide main content sections
           document.querySelectorAll('.hero, #guide-section, #results').forEach(el => { el.style.display = 'none'; });
           // Show FAQ section
@@ -1575,10 +1592,12 @@
           document.getElementById('homeNavDropdownMenu').style.display = 'none';
           const faqDropdown = document.getElementById('faqNavDropdownMenu');
           faqDropdown.removeAttribute('hidden');
+          if (window.location.hash !== '#faq') history.pushState(null, '', '#faq');
           window.scrollTo(0, 0);
         }
 
-        function hideFAQ() {
+        function hideFAQ(event) {
+          if (event) event.preventDefault();
           // Hide FAQ section
           const faqPage = document.getElementById('faq-page');
           faqPage.setAttribute('hidden', '');
@@ -1594,6 +1613,7 @@
           document.getElementById('faqNavDropdownMenu').setAttribute('hidden', '');
           document.getElementById('faqNavDropdownMenu').style.display = 'none';
           document.getElementById('homeNavDropdownMenu').removeAttribute('hidden');
+          if (window.location.hash === '#faq') history.pushState(null, '', window.location.pathname);
           window.scrollTo(0, 0);
         }
 
@@ -1961,7 +1981,6 @@
         window.addEventListener('DOMContentLoaded', function() {
           if (window.location.hash === '#faq') {
             showFAQ();
-            history.replaceState(null, null, window.location.pathname);
           }
         });
     </script>
